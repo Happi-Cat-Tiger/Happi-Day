@@ -4,6 +4,7 @@ import com.happiday.Happi_Day.domain.entity.article.Article;
 import com.happiday.Happi_Day.domain.entity.article.dto.ReadListArticleDto;
 import com.happiday.Happi_Day.domain.entity.article.dto.ReadOneArticleDto;
 import com.happiday.Happi_Day.domain.entity.article.dto.WriteArticleDto;
+import com.happiday.Happi_Day.domain.entity.product.dto.ReadListSalesDto;
 import com.happiday.Happi_Day.domain.service.ArticleService;
 import com.happiday.Happi_Day.utils.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -57,6 +58,20 @@ public class ArticleController {
             @PageableDefault(size = 12, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<ReadListArticleDto> responseArticles = articleService.readList(categoryId, pageable);
         return new ResponseEntity<>(responseArticles, HttpStatus.OK);
+    }
+
+    // 구독중인 아티스트/팀 게시글 조회
+    @GetMapping("{categoryId}/list/subscribedArtists")
+    public ResponseEntity<Page<ReadListArticleDto>> readArticleBySubscribedArtists(
+            @PathVariable("categoryId") Long id,
+            @PageableDefault(size = 12, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(required = false) String filter,
+            @RequestParam(required = false) String keyword
+    ){
+        String username = SecurityUtils.getCurrentUsername();
+
+        Page<ReadListArticleDto> responseDtoList = articleService.readArticleBySubscribedArtists(pageable, id, filter, keyword, username);
+        return new ResponseEntity<>(responseDtoList, HttpStatus.OK);
     }
 
     // 글 전체글 조회

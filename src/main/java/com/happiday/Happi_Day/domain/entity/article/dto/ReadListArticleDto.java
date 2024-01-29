@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 @Data
 @Builder
 public class ReadListArticleDto {
+    private Long id;
     private String title;
     private String nickname;
     private String date;
@@ -18,6 +19,7 @@ public class ReadListArticleDto {
 
     public static ReadListArticleDto fromEntity(Article article) {
         return ReadListArticleDto.builder()
+                .id(article.getId())
                 .nickname(article.getUser().getNickname())
                 .title(article.getTitle())
                 .date(article.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))

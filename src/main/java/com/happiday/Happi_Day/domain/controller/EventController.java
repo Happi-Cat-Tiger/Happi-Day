@@ -109,7 +109,7 @@ public class EventController {
     @PutMapping(value = "{eventId}",consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<EventResponseDto> updateEvent(
             @PathVariable Long eventId,
-            @Valid @RequestPart(value = "event") EventUpdateDto eventUpdateDto,
+            @RequestPart(value = "event") EventUpdateDto eventUpdateDto,
             @RequestParam(value = "thumbnailFile", required = false) MultipartFile thumbnailFile,
             @RequestParam(value = "imageFile", required = false) MultipartFile imageFile
     ){

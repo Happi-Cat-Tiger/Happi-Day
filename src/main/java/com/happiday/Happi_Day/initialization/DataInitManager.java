@@ -17,6 +17,7 @@ public class DataInitManager {
     private final ArtistInitService artistInitService;
     private final EventInitService eventInitService;
     private final EventCommentInitService eventCommentInitService;
+    private final EventReviewInitService eventReviewInitService;
     private final ArticleCommentInitService articleCommentInitService;
     private final SalesCategoryInitService salesCategoryInitService;
     private final SalesInitService salesInitService;
@@ -34,6 +35,7 @@ public class DataInitManager {
         articleCommentInitService.initArticleComments();
         eventInitService.initEvents();
         eventCommentInitService.initEventComments();
+        eventReviewInitService.initEventReviews();
         salesCategoryInitService.initSalesCategories();
         salesInitService.initSales();
         productInitService.initProducts();

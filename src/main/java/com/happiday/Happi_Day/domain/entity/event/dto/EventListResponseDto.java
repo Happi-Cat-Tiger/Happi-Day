@@ -45,10 +45,12 @@ public class EventListResponseDto {
 
     private int viewCount;
 
+    private int reviewCount;
+
     public EventListResponseDto() {
     }
 
-    public EventListResponseDto(Long id, String nickname, String title, LocalDateTime updatedAt, LocalDateTime startTime, LocalDateTime endTime, String location, String thumbnailUrl, List<String> artists, List<String> teams, List<String> hashtags, int commentCount, int likeCount, int viewCount) {
+    public EventListResponseDto(Long id, String nickname, String title, LocalDateTime updatedAt, LocalDateTime startTime, LocalDateTime endTime, String location, String thumbnailUrl, List<String> artists, List<String> teams, List<String> hashtags, int commentCount, int likeCount, int viewCount, int reviewCount) {
         this.id = id;
         this.nickname = nickname;
         this.title = title;
@@ -63,6 +65,7 @@ public class EventListResponseDto {
         this.commentCount = commentCount;
         this.likeCount = likeCount;
         this.viewCount = viewCount;
+        this.reviewCount = reviewCount;
 
     }
 
@@ -82,6 +85,7 @@ public class EventListResponseDto {
                 .commentCount(event.getComments().size())
                 .likeCount(event.getLikes().size())
                 .viewCount(event.getViewCount())
+                .reviewCount(event.getReviewCount())
                 .build();
     }
 }

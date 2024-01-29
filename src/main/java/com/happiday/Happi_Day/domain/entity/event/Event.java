@@ -100,7 +100,7 @@ public class Event extends BaseEntity {
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "event_hashtag",
-            joinColumns = @JoinColumn(name = "article_id"),
+            joinColumns = @JoinColumn(name = "event_id"),
             inverseJoinColumns = @JoinColumn(name = "hashtag_id")
     )
     private List<Hashtag> hashtags = new ArrayList<>();
@@ -152,4 +152,6 @@ public class Event extends BaseEntity {
     public int getCommentCount() {
         return comments != null ? comments.size() : 0;
     }
+
+    public int getReviewCount() { return reviews != null ? reviews.size() : 0;}
 }

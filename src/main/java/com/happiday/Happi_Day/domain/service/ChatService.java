@@ -1,5 +1,6 @@
 package com.happiday.Happi_Day.domain.service;
 
+import com.happiday.Happi_Day.domain.entity.chat.ChatMessage;
 import com.happiday.Happi_Day.domain.entity.chat.ChatRoom;
 import com.happiday.Happi_Day.domain.entity.chat.dto.ChatMessageDto;
 import com.happiday.Happi_Day.domain.entity.user.User;
@@ -10,11 +11,16 @@ import com.happiday.Happi_Day.exception.CustomException;
 import com.happiday.Happi_Day.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -27,10 +33,15 @@ public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
-    public List<ChatMessageDto> getChatMessages(String username, Long roomId) {
+    public Page<ChatMessageDto> getChatMessages(String username, Long roomId, Pageable pageable) {
         User sender = userRepository.findByUsername(username).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        return chatMessageRepository.findAllByChatRoom_IdOrderByIdDesc(roomId)
-                .stream().map(ChatMessageDto::fromEntity).toList();
+        Page<ChatMessage> chatMessagePage = chatMessageRepository.findAllByChatRoom_IdOrderByIdDesc(roomId, pageable);
+
+        List<ChatMessageDto> chatMessageDtoList = chatMessagePage.getContent().stream()
+                .map(ChatMessageDto::fromEntity)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(chatMessageDtoList, pageable, chatMessagePage.getTotalElements());
     }
 
     @Transactional
@@ -52,5 +63,13 @@ public class ChatService {
         );
 
         return payload;
+    }
+
+    @Transactional
+    public void readMessage(String username, Long roomId) {
+        User sender = userRepository.findByUsername(username).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        List<ChatMessage> chatMessageList = chatMessageRepository.findAllByChatRoom_IdOrderByIdDesc(roomId);
+        chatMessageList.stream().peek(chatMessage -> chatMessage.setChecked()).collect(Collectors.toList());
+        chatMessageRepository.saveAll(chatMessageList);
     }
 }

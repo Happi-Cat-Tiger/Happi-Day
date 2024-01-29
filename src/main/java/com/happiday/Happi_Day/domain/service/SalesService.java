@@ -134,7 +134,7 @@ public class SalesService {
     }
 
     // 구독중인 아티스트의 굿즈/공구 리스트 조회
-    public Page<ReadListSalesDto> readEventsBySubscribedArtists(Pageable pageable, Long categoryId, String filter, String keyword, String username) {
+    public Page<ReadListSalesDto> readSalesBySubscribedArtists(Pageable pageable, Long categoryId, String filter, String keyword, String username) {
         SalesCategory category = salesCategoryRepository.findById(categoryId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
 

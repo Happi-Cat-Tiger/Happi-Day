@@ -6,8 +6,10 @@ import com.happiday.Happi_Day.domain.entity.article.dto.ReadListArticleDto;
 import com.happiday.Happi_Day.domain.entity.article.dto.ReadListCommentDto;
 import com.happiday.Happi_Day.domain.entity.event.Event;
 import com.happiday.Happi_Day.domain.entity.event.EventComment;
+import com.happiday.Happi_Day.domain.entity.event.EventReview;
 import com.happiday.Happi_Day.domain.entity.event.dto.EventListResponseDto;
 import com.happiday.Happi_Day.domain.entity.event.dto.comment.EventCommentListResponseDto;
+import com.happiday.Happi_Day.domain.entity.event.dto.review.EventReviewResponseDto;
 import com.happiday.Happi_Day.domain.entity.product.Order;
 import com.happiday.Happi_Day.domain.entity.product.Sales;
 import com.happiday.Happi_Day.domain.entity.product.dto.*;
@@ -33,6 +35,7 @@ public class MyPageService {
     private final SalesRepository salesRepository;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
+    private final EventReviewRepository reviewRepository;
 
     public Page<ReadListArticleDto> readMyArticles(String username, Pageable pageable) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -83,6 +86,13 @@ public class MyPageService {
         return events.map(EventListResponseDto::fromEntity);
     }
 
+    public Page<EventReviewResponseDto> getMyReviews(String username, Pageable pageable) {
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        Page<EventReview> reviews = reviewRepository.findAllByUser(user, pageable);
+
+        return  reviews.map(EventReviewResponseDto::fromEntity);
+    }
+
     public Page<ReadListSalesDto> readMySales(String username, Pageable pageable) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Page<Sales> sales = salesRepository.findAllByUsers(user, pageable);
@@ -103,4 +113,5 @@ public class MyPageService {
 
         return orders.map(ReadListOrderDto::fromEntity);
     }
+
 }

@@ -4,6 +4,7 @@ import com.happiday.Happi_Day.domain.entity.article.dto.ReadListArticleDto;
 import com.happiday.Happi_Day.domain.entity.article.dto.ReadListCommentDto;
 import com.happiday.Happi_Day.domain.entity.event.dto.EventListResponseDto;
 import com.happiday.Happi_Day.domain.entity.event.dto.comment.EventCommentListResponseDto;
+import com.happiday.Happi_Day.domain.entity.event.dto.review.EventReviewResponseDto;
 import com.happiday.Happi_Day.domain.entity.product.dto.ReadListOrderDto;
 import com.happiday.Happi_Day.domain.entity.product.dto.ReadListSalesDto;
 import com.happiday.Happi_Day.domain.entity.user.dto.UserPWDto;
@@ -37,13 +38,25 @@ public class UserController {
         UserResponseDto myProfile = userService.getUserProfile(username);
         return new ResponseEntity<>(myProfile,HttpStatus.OK);
     }
-    @PatchMapping(value = "/info", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<UserResponseDto> updateUser(
-            @RequestPart(value = "dto", required = false) UserUpdateDto dto,
-            @RequestPart(value = "multipartFile", required = false) MultipartFile multipartFile) {
+    @PatchMapping("/info")
+    public ResponseEntity<UserResponseDto> updateUser(@RequestBody UserUpdateDto dto) {
         String username = SecurityUtils.getCurrentUsername();
-        UserResponseDto newProfile = userService.updateUserProfile(username, dto, multipartFile);
+        UserResponseDto newProfile = userService.updateUserProfile(username, dto);
         return new ResponseEntity<>(newProfile,HttpStatus.OK);
+    }
+
+    @PatchMapping("/info/image")
+    public ResponseEntity<UserResponseDto> changeImage(@RequestPart("multipartFile") MultipartFile multipartFile) {
+        String username = SecurityUtils.getCurrentUsername();
+        UserResponseDto profile = userService.changeImage(username, multipartFile);
+        return new ResponseEntity<>(profile, HttpStatus.OK);
+    }
+
+    @PatchMapping("/info/default")
+    public ResponseEntity<UserResponseDto> resetImage() {
+        String username = SecurityUtils.getCurrentUsername();
+        UserResponseDto profile = userService.resetImage(username);
+        return new ResponseEntity<>(profile, HttpStatus.OK);
     }
 
     @DeleteMapping("/withdrawal")
@@ -51,7 +64,6 @@ public class UserController {
         String username = SecurityUtils.getCurrentUsername();
         userService.deleteUser(username, dto);
         return new ResponseEntity<>("회원탈퇴되었습니다.", HttpStatus.OK);
-
     }
 
     @GetMapping("/articles")
@@ -94,6 +106,12 @@ public class UserController {
     public ResponseEntity<Page<EventListResponseDto>> getJoinEvents(@PageableDefault(size = 12, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         String username = SecurityUtils.getCurrentUsername();
         return new ResponseEntity<>(myPageService.readJoinEvents(username, pageable), HttpStatus.OK);
+    }
+
+    @GetMapping("/reviews")
+    public ResponseEntity<Page<EventReviewResponseDto>> getMyReviews(@PageableDefault(size = 12, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+        String username = SecurityUtils.getCurrentUsername();
+        return new ResponseEntity<>(myPageService.getMyReviews(username, pageable), HttpStatus.OK);
     }
 
     @GetMapping("/sales")

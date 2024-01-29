@@ -5,9 +5,11 @@ import com.happiday.Happi_Day.domain.entity.user.dto.*;
 import com.happiday.Happi_Day.domain.repository.UserRepository;
 import com.happiday.Happi_Day.exception.CustomException;
 import com.happiday.Happi_Day.exception.ErrorCode;
+import com.happiday.Happi_Day.utils.DefaultImageUtils;
 import com.happiday.Happi_Day.utils.FileUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,7 @@ public class UserService {
     private final MailService mailService;
     private final StringRedisTemplate stringRedisTemplate;
     private final FileUtils fileUtils;
+    private final DefaultImageUtils defaultImageUtils;
 
     public UserResponseDto getUserProfile(String username) {
         User user = userRepository.findByUsername(username)
@@ -35,19 +38,40 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponseDto updateUserProfile(String username, UserUpdateDto dto, MultipartFile multipartFile) {
+    public UserResponseDto updateUserProfile(String username, UserUpdateDto dto) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        if (dto != null) {
-            user.update(dto.toEntity(), passwordEncoder);
+        if (userRepository.existsByNickname(dto.getNickname())) {
+            throw new CustomException(ErrorCode.NICKNAME_CONFLICT);
         }
+        if (userRepository.existsByPhone(dto.getPhone())) {
+            throw new CustomException(ErrorCode.PHONE_CONFLICT);
+        }
+        else
+            user.update(dto.toEntity(), passwordEncoder);
 
-        if (!multipartFile.isEmpty()) {
+        userRepository.save(user);
+        return UserResponseDto.fromEntity(user);
+    }
+
+    @Transactional
+    public UserResponseDto changeImage(String username, MultipartFile multipartFile) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        if (multipartFile != null && !multipartFile.isEmpty()) {
             String url = fileUtils.uploadFile(multipartFile);
             user.setImageUrl(url);
         }
+        userRepository.save(user);
+        return UserResponseDto.fromEntity(user);
+    }
 
+    @Transactional
+    public UserResponseDto resetImage(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        user.setImageUrl(defaultImageUtils.getDefaultImageUrlUserProfile());
         userRepository.save(user);
         return UserResponseDto.fromEntity(user);
     }
@@ -88,8 +112,7 @@ public class UserService {
 
         if (storedCode == null) {
             throw new CustomException(ErrorCode.CODE_TIME_ERROR);
-        }
-        else if (!dto.getCode().equals(storedCode)) {
+        } else if (!dto.getCode().equals(storedCode)) {
             throw new CustomException(ErrorCode.CODE_NOT_MATCHED);
         }
         return true;

@@ -30,6 +30,7 @@ public class ChatMessageDto {
 
     public ChatMessage newEntity(User user, ChatRoom chatRoom) {
         return ChatMessage.builder()
+                .checked(false)
                 .sender(user)
                 .chatRoom(chatRoom)
                 .content(content)

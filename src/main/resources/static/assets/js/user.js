@@ -5,7 +5,7 @@ const fetchLoggedIn = function () {
         return new Promise(resolve => {
             resolve(false)
         })
-    else return fetch("/api/v1/users/info", {
+    else return fetch("/api/v1/user/info", {
         headers: {
             'Authorization': `Bearer ${getJwt()}`
         }

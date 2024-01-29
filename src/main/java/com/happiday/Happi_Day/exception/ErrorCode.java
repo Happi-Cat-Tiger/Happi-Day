@@ -53,6 +53,7 @@ public enum ErrorCode {
     EVENT_REVIEW_ALREADY_SUBMITTED(HttpStatus.FORBIDDEN, "이미 리뷰를 작성한 이벤트입니다."),
     EVENT_REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 리뷰를 찾을 수 없습니다."),
     EVENT_REVIEW_ALREADY_DELETED(HttpStatus.NOT_FOUND, "이미 삭제된 리뷰입니다."),
+    EVENT_NOT_STARTED(HttpStatus.FORBIDDEN, "아직 진행되지 않은 이벤트입니다."),
 
     // user
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 유저입니다."),
@@ -63,6 +64,8 @@ public enum ErrorCode {
     MAIL_ENCODING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "이메일 인코딩 중 오류가 발생했습니다."),
     CODE_TIME_ERROR(HttpStatus.BAD_REQUEST, "코드의 인증시간이 다 되었습니다."),
     CODE_NOT_MATCHED(HttpStatus.BAD_REQUEST, "코드가 일치하지 않습니다."),
+    NICKNAME_CONFLICT(HttpStatus.CONFLICT, "중복된 닉네임입니다."),
+    PHONE_CONFLICT(HttpStatus.CONFLICT, "중복된 전화번호입니다."),
 
     // chat
     CHATROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 채팅방입니다."),

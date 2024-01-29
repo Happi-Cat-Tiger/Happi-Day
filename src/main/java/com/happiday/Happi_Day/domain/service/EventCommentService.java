@@ -80,7 +80,7 @@ public class EventCommentService {
             throw new CustomException(ErrorCode.EVENT_COMMENT_ALREADY_DELETED);
         }
 
-        if (!user.getUsername().equals(username)) {
+        if (!comment.getUser().equals(user)) {
             throw new CustomException(ErrorCode.FORBIDDEN);
         }
 
@@ -106,7 +106,7 @@ public class EventCommentService {
             throw new CustomException(ErrorCode.EVENT_COMMENT_ALREADY_DELETED);
         }
 
-        if (!user.getUsername().equals(username)) {
+        if (!comment.getUser().equals(user)) {
             throw new CustomException(ErrorCode.FORBIDDEN);
         }
 

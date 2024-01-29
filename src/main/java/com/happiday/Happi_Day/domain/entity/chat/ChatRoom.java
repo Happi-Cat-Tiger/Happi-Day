@@ -35,9 +35,11 @@ public class ChatRoom extends BaseEntity {
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL)
     private List<ChatMessage> chatMessages = new ArrayList<>();
 
-    private boolean isSenderDeleted = false;
+    private Boolean isSenderDeleted = false;
 
-    private boolean isReceiverDeleted = false;
+    private Boolean isReceiverDeleted = false;
+
+    private Boolean open = false;
 
     public void deleteChatRoomBySender() {
         this.isSenderDeleted = true;

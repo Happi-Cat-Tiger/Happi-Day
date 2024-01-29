@@ -14,6 +14,7 @@ import com.happiday.Happi_Day.exception.CustomException;
 import com.happiday.Happi_Day.exception.ErrorCode;
 import com.happiday.Happi_Day.utils.DefaultImageUtils;
 import com.happiday.Happi_Day.utils.FileUtils;
+import com.happiday.Happi_Day.utils.HashtagUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Triple;
@@ -40,6 +41,7 @@ public class EventService {
     private final DefaultImageUtils defaultImageUtils;
 
 
+
     @Transactional
     public EventResponseDto createEvent(
             EventCreateDto request, MultipartFile thumbnailFile, MultipartFile imageFile, String username) {
@@ -60,7 +62,8 @@ public class EventService {
 
         // hashTag 처리
         //get Left, Middle, Right가 각각 1, 2, 3번째 요소 반환
-        Triple<List<Artist>, List<Team>, List<Hashtag>> processedTags = processTags(request.getHashtags());
+        HashtagUtils hashtagUtils = new HashtagUtils(artistRepository, teamRepository);
+        Triple<List<Artist>, List<Team>, List<Hashtag>> processedTags = hashtagUtils.processTags(request.getHashtags());
 
         Event event = Event.builder()
                 .user(user)
@@ -98,7 +101,6 @@ public class EventService {
 
     public Page<EventListResponseDto> readEventsBySubscribedArtists(Pageable pageable, String filter, String keyword, String username) {
         log.info("내가 구독한 아티스트의 이벤트 리스트 조회");
-        log.info("username : " + username);
         User user = userRepository.findByUsername(username).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         Page<Event> events = eventRepository.findEventsByFilterAndKeywordAndSubscribedArtists(pageable, filter, keyword, user);
@@ -146,12 +148,13 @@ public class EventService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        if (!user.getUsername().equals(username)) {
-            throw new CustomException(ErrorCode.FORBIDDEN);
-        }
-
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new CustomException(ErrorCode.EVENT_NOT_FOUND));
+
+        if (!event.getUser().equals(user)) {
+                throw new CustomException(ErrorCode.FORBIDDEN);
+        }
+
 
         // 이미지 업로드 추가
         if (thumbnailFile != null && !thumbnailFile.isEmpty()) {
@@ -164,7 +167,10 @@ public class EventService {
             event.setImageUrl(newImageUrl);
         }
 
-            Triple<List<Artist>, List<Team>, List<Hashtag>> processedTags = processTags(request.getHashtags());
+            // hashTag 처리
+            //get Left, Middle, Right가 각각 1, 2, 3번째 요소 반환
+            HashtagUtils hashtagUtils = new HashtagUtils(artistRepository, teamRepository);
+            Triple<List<Artist>, List<Team>, List<Hashtag>> processedTags = hashtagUtils.processTags(request.getHashtags());
 
             event.update(Event.builder()
                 .user(user)
@@ -270,25 +276,5 @@ public class EventService {
     public void increaseViewCount(String clientAddress, Long eventId) {
         eventRepository.increaseViewCount(eventId);
         redisService.clientRequest(clientAddress, eventId);
-    }
-
-    // hashTag 처리
-    private Triple<List<Artist>, List<Team>, List<Hashtag>> processTags(List<String> hashtagRequests) {
-        List<Artist> artists = new ArrayList<>();
-        List<Team> teams = new ArrayList<>();
-        List<Hashtag> hashtags = new ArrayList<>();
-
-        for (String hashtagRequest : hashtagRequests) {
-            Optional<Artist> existingArtist = artistRepository.findByName(hashtagRequest);
-            Optional<Team> existingTeam = teamRepository.findByName(hashtagRequest);
-            if (existingArtist.isPresent()) {
-                artists.add(existingArtist.get());
-            } else if (existingTeam.isPresent()) {
-                teams.add(existingTeam.get());
-            } else {
-                hashtags.add(Hashtag.builder().tag(hashtagRequest).build());
-            }
-        }
-        return Triple.of(artists, teams, hashtags);
     }
 }

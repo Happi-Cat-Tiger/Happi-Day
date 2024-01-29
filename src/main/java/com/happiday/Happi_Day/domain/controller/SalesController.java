@@ -58,7 +58,7 @@ public class SalesController {
     ) {
         String username = SecurityUtils.getCurrentUsername();
 
-        Page<ReadListSalesDto> responseDtoList = salesService.readEventsBySubscribedArtists(pageable, id, filter, keyword, username);
+        Page<ReadListSalesDto> responseDtoList = salesService.readSalesBySubscribedArtists(pageable, id, filter, keyword, username);
         return new ResponseEntity<>(responseDtoList, HttpStatus.OK);
     }
 

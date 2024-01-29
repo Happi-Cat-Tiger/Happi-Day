@@ -8,6 +8,7 @@ import com.happiday.Happi_Day.domain.entity.article.dto.ReadOneArticleDto;
 import com.happiday.Happi_Day.domain.entity.article.dto.WriteArticleDto;
 import com.happiday.Happi_Day.domain.entity.artist.Artist;
 import com.happiday.Happi_Day.domain.entity.board.BoardCategory;
+import com.happiday.Happi_Day.domain.entity.product.Sales;
 import com.happiday.Happi_Day.domain.entity.team.Team;
 import com.happiday.Happi_Day.domain.entity.user.User;
 import com.happiday.Happi_Day.domain.repository.*;
@@ -43,6 +44,7 @@ public class ArticleService {
     private final HashtagRepository hashtagRepository;
     private final FileUtils fileUtils;
     private final RedisService redisService;
+    private final QueryArticleRepository queryArticleRepository;
 
     @Transactional
     public ReadOneArticleDto writeArticle(Long categoryId, WriteArticleDto dto, MultipartFile thumbnailImage, List<MultipartFile> imageFileList, String username) {
@@ -133,6 +135,17 @@ public class ArticleService {
 
         Page<Article> articles = articleRepository.findAllByCategory(category, pageable);
         return articles.map(ReadListArticleDto::fromEntity);
+    }
+
+    public Page<ReadListArticleDto> readArticleBySubscribedArtists(Pageable pageable, Long id, String filter, String keyword, String username) {
+        BoardCategory category = categoryRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
+
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Page<Article> articleList = queryArticleRepository.findArticleByFilterAndKeywordAndSubscribedArtists(pageable, filter, keyword, user);
+
+        return articleList.map(ReadListArticleDto::fromEntity);
     }
 
     // 글 전체글 조회
@@ -282,4 +295,6 @@ public class ArticleService {
         articleRepository.increaseViewCount(articleId);
         redisService.clientRequest(clientAddress, articleId);
     }
+
+
 }

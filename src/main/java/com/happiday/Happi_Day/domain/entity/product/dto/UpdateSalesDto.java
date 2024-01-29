@@ -12,8 +12,6 @@ import java.util.List;
 public class UpdateSalesDto {
     private String name;
     private String description;
-    private List<String> artists;
-    private List<String> teams;
     private List<String> hashtag;
     private String status;
     private String account;

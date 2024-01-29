@@ -113,17 +113,20 @@
             for (const room of bodyJson) {
                 const roomElem = document.createElement('div')
                 const roomWith = document.createElement('h4')
+                const roomUnread = document.createElement('p')
                 const roomOpenButton = document.createElement('button')
                 const roomDeleteButton = document.createElement('button')
                 if (selectedRoom === room.id) {
                     fetchMessages(room.id)
                 }
                 roomWith.innerText = room.receiver
+                roomUnread.innerText = `읽지 않은 메시지: ${room.messageNotRead}`
                 roomOpenButton.innerText = '열기'
                 roomOpenButton.addEventListener('click', () => {
                     selectedRoom = room.id
                     const chatTitle = document.getElementById('chat-title')
                     chatTitle.innerText = roomWith.innerText
+                    roomUnread.innerText = '읽지 않은 메시지: 0'
                     fetchMessages(room.id)
                 })
 
@@ -134,6 +137,7 @@
                 })
 
                 roomElem.appendChild(roomWith)
+                roomElem.appendChild(roomUnread)
                 roomElem.appendChild(roomOpenButton)
                 roomElem.appendChild(roomDeleteButton)
                 roomElem.appendChild(document.createElement('hr'))
@@ -160,7 +164,9 @@
         }).then(bodyJson => {
             const messageContainer = document.getElementById('message-container')
             messageContainer.innerHTML = ``
-            for (const message of bodyJson) {
+
+            const messages = bodyJson.content;
+            for (const message of messages) {
                 const messageElem = document.createElement('div')
                 const senderElem = document.createElement('h4')
                 const contentElem = document.createElement('p')
@@ -273,14 +279,23 @@
                         messageElem.appendChild(senderElem)
                         messageElem.appendChild(contentElem)
                         messageElem.appendChild(timeElem)
-
                         messageContainer.appendChild(messageElem)
                         messageContainer.scrollTop = messageContainer.scrollHeight
+
+                        fetch(`/api/chat/rooms/${message.roomId}/read`, {
+                            method: 'put',
+                            headers: {
+                                'Authorization': `Bearer ${getJwt()}`,
+                            },
+                        })
 
                         const roomContainer = document.getElementById('room-container')
                         roomContainer.insertBefore(targetRoom, roomContainer.firstChild)
                     }
                     else if (targetRoom) {
+                        const roomUnread = targetRoom.childNodes[2]
+                        const lastUnread = parseInt(roomUnread.innerText.split(': ')[1]) + 1
+                        roomUnread.innerText = `읽지 않은 메시지: ${lastUnread}`
                         const roomContainer = document.getElementById('room-container')
                         roomContainer.insertBefore(targetRoom, roomContainer.firstChild)
                     }

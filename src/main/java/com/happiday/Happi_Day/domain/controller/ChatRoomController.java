@@ -1,5 +1,6 @@
 package com.happiday.Happi_Day.domain.controller;
 
+import com.happiday.Happi_Day.domain.entity.chat.ChatMessage;
 import com.happiday.Happi_Day.domain.entity.chat.dto.ChatMessageDto;
 import com.happiday.Happi_Day.domain.entity.chat.dto.ChatNicknameDto;
 import com.happiday.Happi_Day.domain.entity.chat.dto.ChatRoomResponse;
@@ -11,6 +12,10 @@ import com.happiday.Happi_Day.domain.service.ChatService;
 import com.happiday.Happi_Day.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -45,9 +50,9 @@ public class ChatRoomController {
 
     // 채팅방 하나 찾기 -> 내역 가져오기
     @GetMapping("/{roomId}")
-    public ResponseEntity<List<ChatMessageDto>> getChatRoom(@PathVariable("roomId") Long roomId) {
+    public ResponseEntity<Page<ChatMessageDto>> getChatRoom(@PathVariable("roomId") Long roomId, @PageableDefault(size = 12, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         String username = SecurityUtils.getCurrentUsername();
-        return new ResponseEntity<>(chatService.getChatMessages(username, roomId), HttpStatus.OK);
+        return new ResponseEntity<>(chatService.getChatMessages(username, roomId, pageable), HttpStatus.OK);
     }
 
     @GetMapping("/findAllUser")
@@ -62,6 +67,14 @@ public class ChatRoomController {
         String username = SecurityUtils.getCurrentUsername();
         chatRoomService.deleteChatRoom(username, roomId);
         return new ResponseEntity<>("채팅방이 삭제되었습니다.", HttpStatus.OK);
+    }
+
+    @PutMapping("/rooms/{roomId}/read")
+    public ResponseEntity<String> readMessage(@PathVariable("roomId") Long roomId) {
+        String username = SecurityUtils.getCurrentUsername();
+        chatService.readMessage(username, roomId);
+        return new ResponseEntity<>("채팅을 읽었습니다.", HttpStatus.OK);
+
     }
 
 }

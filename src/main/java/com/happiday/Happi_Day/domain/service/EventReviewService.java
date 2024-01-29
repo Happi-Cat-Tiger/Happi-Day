@@ -4,6 +4,7 @@ import com.happiday.Happi_Day.domain.entity.event.Event;
 import com.happiday.Happi_Day.domain.entity.event.EventReview;
 import com.happiday.Happi_Day.domain.entity.event.ReviewImage;
 import com.happiday.Happi_Day.domain.entity.event.dto.review.EventReviewCreateDto;
+import com.happiday.Happi_Day.domain.entity.event.dto.review.EventReviewListResponseDto;
 import com.happiday.Happi_Day.domain.entity.event.dto.review.EventReviewResponseDto;
 import com.happiday.Happi_Day.domain.entity.event.dto.review.EventReviewUpdateDto;
 import com.happiday.Happi_Day.domain.entity.user.User;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,6 +47,13 @@ public class EventReviewService {
 
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new CustomException(ErrorCode.EVENT_NOT_FOUND));
+
+        // 진행되지 않은 이벤트인지 검증
+        boolean isEventStarted = event.getStartTime().isBefore(LocalDateTime.now());
+
+        if (isEventStarted) {
+            throw new CustomException(ErrorCode.EVENT_NOT_STARTED);
+        }
 
         // 해당 이벤트에 리뷰를 이미 작성했는지 검증
         boolean isAlreadyWritten = user.getEventReviews().stream()
@@ -83,14 +92,26 @@ public class EventReviewService {
 
     }
 
-    public Page<EventReviewResponseDto> readReviews(Long eventId, Pageable pageable) {
+    public Page<EventReviewListResponseDto> readReviews(Long eventId, Pageable pageable) {
 
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new CustomException(ErrorCode.EVENT_NOT_FOUND));
 
         Page<EventReview> reviewList = reviewRepository.findAllByEvent(event, pageable);
 
-        return reviewList.map(EventReviewResponseDto::fromEntity);
+        return reviewList.map(EventReviewListResponseDto::fromEntity);
+    }
+
+    public EventReviewResponseDto readReview(Long eventId, Long reviewId) {
+        log.info("이벤트 리뷰 단일 조회");
+
+        eventRepository.findById(eventId)
+                .orElseThrow(() -> new CustomException(ErrorCode.EVENT_NOT_FOUND));
+
+        EventReview review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new CustomException(ErrorCode.EVENT_REVIEW_NOT_FOUND));
+
+        return EventReviewResponseDto.fromEntity(review);
     }
 
     @Transactional
@@ -106,7 +127,7 @@ public class EventReviewService {
         EventReview review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new CustomException(ErrorCode.EVENT_REVIEW_NOT_FOUND));
 
-        if (!user.getUsername().equals(username)) {
+        if (!review.getUser().equals(user)) {
             throw new CustomException(ErrorCode.FORBIDDEN);
         }
 
@@ -141,7 +162,7 @@ public class EventReviewService {
         EventReview review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new CustomException(ErrorCode.EVENT_REVIEW_NOT_FOUND));
 
-        if (!user.getUsername().equals(username)) {
+        if (!review.getUser().equals(user)) {
             throw new CustomException(ErrorCode.FORBIDDEN);
         }
 

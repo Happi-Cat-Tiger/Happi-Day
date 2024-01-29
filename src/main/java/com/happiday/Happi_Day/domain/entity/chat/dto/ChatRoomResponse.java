@@ -14,11 +14,17 @@ import lombok.NoArgsConstructor;
 public class ChatRoomResponse {
     Long id;
     String receiver;
+    private Integer messageCount;
+    private Integer messageNotRead;
 
     public static ChatRoomResponse fromEntity(ChatRoom chatRoom, User sender) {
         return ChatRoomResponse.builder()
                 .id(chatRoom.getId())
                 .receiver(chatRoom.getSender().equals(sender) ? chatRoom.getReceiver().getNickname() : chatRoom.getSender().getNickname())
+                .messageCount(chatRoom.getChatMessages() == null ? 0 : chatRoom.getChatMessages().size())
+                .messageNotRead(chatRoom.getChatMessages() == null ? 0 : chatRoom.getChatMessages().stream().reduce(
+                        0, (sum, message) -> sum + ((!message.getChecked() && !message.getSender().equals(sender)) ? 1: 0), Integer::sum
+                ))
                 .build();
     }
 }

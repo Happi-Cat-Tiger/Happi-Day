@@ -30,4 +30,10 @@ public class ChatMessage extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "room_id")
     private ChatRoom chatRoom;
+
+    private Boolean checked = false;
+
+    public void setChecked() {
+        this.checked = true;
+    }
 }
