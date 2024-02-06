@@ -1,5 +1,7 @@
 package com.happiday.Happi_Day.domain.service;
 
+import com.happiday.Happi_Day.domain.entity.user.CustomUserDetails;
+import com.happiday.Happi_Day.domain.entity.user.RoleType;
 import com.happiday.Happi_Day.domain.entity.user.User;
 import com.happiday.Happi_Day.domain.entity.user.dto.*;
 import com.happiday.Happi_Day.domain.repository.UserRepository;
@@ -17,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -30,6 +34,53 @@ public class UserService {
     private final StringRedisTemplate stringRedisTemplate;
     private final FileUtils fileUtils;
     private final DefaultImageUtils defaultImageUtils;
+    private final JpaUserDetailsManager manager;
+
+    @Transactional
+    public void createUser(UserRegisterDto dto) {
+        // 유효성 검사
+        checkValidEmail(dto.getUsername());
+        checkValidPhone(dto.getPhone());
+
+        // DB 확인
+        checkDuplicatedUsername(dto.getUsername());
+        checkDuplicatedNickname(dto.getNickname());
+        checkDuplicatedPhone(dto.getPhone());
+
+        CustomUserDetails userDetails = CustomUserDetails.builder()
+                .username(dto.getUsername())
+                .password(passwordEncoder.encode(dto.getPassword()))
+                .nickname(dto.getNickname())
+                .realname(dto.getRealname())
+                .phone(dto.getPhone())
+                .role(RoleType.USER)
+                .imageUrl(defaultImageUtils.getDefaultImageUrlUserProfile())
+                .build();
+        manager.createUser(userDetails);
+    }
+
+    @Transactional
+    public void createAdmin(UserRegisterDto dto) {
+        // 유효성 검사
+        checkValidEmail(dto.getUsername());
+        checkValidPhone(dto.getPhone());
+
+        // DB 확인
+        checkDuplicatedUsername(dto.getUsername());
+        checkDuplicatedNickname(dto.getNickname());
+        checkDuplicatedPhone(dto.getPhone());
+
+        CustomUserDetails userDetails = CustomUserDetails.builder()
+                .username(dto.getUsername())
+                .password(passwordEncoder.encode(dto.getPassword()))
+                .nickname(dto.getNickname())
+                .realname(dto.getRealname())
+                .phone(dto.getPhone())
+                .role(RoleType.ADMIN)
+                .imageUrl(defaultImageUtils.getDefaultImageUrlUserProfile())
+                .build();
+        manager.createUser(userDetails);
+    }
 
     public UserResponseDto getUserProfile(String username) {
         User user = userRepository.findByUsername(username)
@@ -42,17 +93,54 @@ public class UserService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        if (userRepository.existsByNickname(dto.getNickname())) {
-            throw new CustomException(ErrorCode.NICKNAME_CONFLICT);
-        }
-        if (userRepository.existsByPhone(dto.getPhone())) {
-            throw new CustomException(ErrorCode.PHONE_CONFLICT);
-        }
-        else
-            user.update(dto.toEntity(), passwordEncoder);
+        // 유효성 검사
+        checkValidPhone(dto.getPhone());
+
+        // DB 확인
+        checkDuplicatedNickname(dto.getNickname());
+        checkDuplicatedPhone(dto.getPhone());
+
+        user.update(dto.toEntity(), passwordEncoder);
 
         userRepository.save(user);
         return UserResponseDto.fromEntity(user);
+    }
+
+    public void checkValidPhone(String phone) {
+        String phoneRegex = "\\d{11}";
+        Pattern pattern = Pattern.compile(phoneRegex);
+        Matcher matcher = pattern.matcher(phone);
+
+        if (!matcher.matches()) {
+            throw new CustomException(ErrorCode.PHONE_FORMAT_ERROR);
+        }
+    }
+
+    public void checkValidEmail(String email) {
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        Matcher matcher = pattern.matcher(email);
+
+        if (!matcher.matches()) {
+            throw new CustomException(ErrorCode.EMAIL_FORMAT_ERROR);
+        }
+    }
+
+    public void checkDuplicatedNickname(String nickname) {
+        if (userRepository.existsByNickname(nickname)) {
+            throw new CustomException(ErrorCode.NICKNAME_CONFLICT);
+        }
+    }
+
+    public void checkDuplicatedPhone(String phone) {
+        if (userRepository.existsByPhone(phone)) {
+            throw new CustomException(ErrorCode.PHONE_CONFLICT);
+        }
+    }
+
+    public void checkDuplicatedUsername(String username) {
+        if (userRepository.existsByUsername(username))
+            throw new CustomException(ErrorCode.USER_CONFLICT);
     }
 
     @Transactional

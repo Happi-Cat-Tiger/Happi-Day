@@ -4,9 +4,7 @@ import com.happiday.Happi_Day.domain.entity.article.Article;
 import com.happiday.Happi_Day.domain.entity.article.ArticleComment;
 import com.happiday.Happi_Day.domain.entity.article.dto.ReadListArticleDto;
 import com.happiday.Happi_Day.domain.entity.article.dto.ReadListCommentDto;
-import com.happiday.Happi_Day.domain.entity.event.Event;
-import com.happiday.Happi_Day.domain.entity.event.EventComment;
-import com.happiday.Happi_Day.domain.entity.event.EventReview;
+import com.happiday.Happi_Day.domain.entity.event.*;
 import com.happiday.Happi_Day.domain.entity.event.dto.EventListResponseDto;
 import com.happiday.Happi_Day.domain.entity.event.dto.comment.EventCommentListResponseDto;
 import com.happiday.Happi_Day.domain.entity.event.dto.review.EventReviewResponseDto;
@@ -36,6 +34,8 @@ public class MyPageService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final EventReviewRepository reviewRepository;
+    private final EventParticipationRepository eventParticipationRepository;
+    private final EventLikeRepository eventLikeRepository;
 
     public Page<ReadListArticleDto> readMyArticles(String username, Pageable pageable) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -53,7 +53,8 @@ public class MyPageService {
 
     public Page<ReadListArticleDto> readLikeArticles(String username, Pageable pageable) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        Page<Article> articles = articleRepository.findAllByLikeUsersContains(user, pageable);
+//        Page<Article> articles = articleRepository.findAllByLikeUsersContains(user, pageable);
+        Page<Article> articles = articleRepository.findAllByArticleLikesUserContains(user, pageable);
 
         return articles.map(ReadListArticleDto::fromEntity);
     }
@@ -74,16 +75,18 @@ public class MyPageService {
 
     public Page<EventListResponseDto> readLikeEvents(String username, Pageable pageable) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        Page<Event> events = eventRepository.findAllByLikesContains(user, pageable);
 
-        return events.map(EventListResponseDto::fromEntity);
+        Page<EventLike> eventLikes = eventLikeRepository.findByUser(user, pageable);
+
+        return eventLikes.map(eventLike -> EventListResponseDto.fromEntity(eventLike.getEvent()));
     }
 
     public Page<EventListResponseDto> readJoinEvents(String username, Pageable pageable) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        Page<Event> events = eventRepository.findAllByJoinListContains(user, pageable);
 
-        return events.map(EventListResponseDto::fromEntity);
+        Page<EventParticipation> eventParticipationList = eventParticipationRepository.findByUser(user, pageable);
+
+        return eventParticipationList.map(eventParticipation -> EventListResponseDto.fromEntity(eventParticipation.getEvent()));
     }
 
     public Page<EventReviewResponseDto> getMyReviews(String username, Pageable pageable) {
@@ -102,7 +105,8 @@ public class MyPageService {
 
     public Page<ReadListSalesDto> readLikeSales(String username, Pageable pageable) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        Page<Sales> orders = salesRepository.findAllBySalesLikesUsersContains(user, pageable);
+//        Page<Sales> orders = salesRepository.findAllBySalesLikesUsersContains(user, pageable);
+        Page<Sales> orders = salesRepository.findAllBySalesLikesUserContains(user, pageable);
 
         return orders.map(ReadListSalesDto::fromEntity);
     }

@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface ArtistRepository extends JpaRepository<Artist, Long> {
     Optional<Artist> findByName(String artistName);
 
-    @Query("SELECT a FROM Artist a WHERE a.id NOT IN (SELECT ua.id FROM User u JOIN u.subscribedArtists ua WHERE u.id = :userId)")
+    @Query("SELECT a FROM Artist a WHERE a.id NOT IN (SELECT ua.id FROM User u JOIN u.artistSubscriptionList ua WHERE u.id = :userId)")
     Page<Artist> findUnsubscribedArtists(@Param("userId") Long userId, Pageable pageable);
 
     boolean existsByName(String name);

@@ -79,9 +79,13 @@ public class Sales extends BaseEntity {
     @OneToMany(mappedBy = "sales")
     private List<Order> orders = new ArrayList<>();
 
+//    // 판매글 찜하기
+//    @ManyToMany(mappedBy = "salesLikes")
+//    private List<User> salesLikesUsers = new ArrayList<>();
+
     // 판매글 찜하기
-    @ManyToMany(mappedBy = "salesLikes")
-    private List<User> salesLikesUsers = new ArrayList<>();
+    @OneToMany(mappedBy = "sales")
+    private List<SalesLike> salesLikes = new ArrayList<>();
 
     // 아티스트-판매글 매핑
     @ManyToMany
@@ -101,14 +105,18 @@ public class Sales extends BaseEntity {
     )
     private List<Team> teams = new ArrayList<>();
 
+//    // 해시태그 매핑
+//    @ManyToMany(cascade = CascadeType.ALL)
+//    @JoinTable(
+//            name = "sales_hashtag",
+//            joinColumns = @JoinColumn(name = "sales_id"),
+//            inverseJoinColumns = @JoinColumn(name = "hashtag_id")
+//    )
+//    private List<Hashtag> hashtags = new ArrayList<>();
+
     // 해시태그 매핑
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "sales_hashtag",
-            joinColumns = @JoinColumn(name = "sales_id"),
-            inverseJoinColumns = @JoinColumn(name = "hashtag_id")
-    )
-    private List<Hashtag> hashtags = new ArrayList<>();
+    @OneToMany(mappedBy = "sales")
+    private List<SalesHashtag> salesHashtags = new ArrayList<>();
 
     public void updateStatus(SalesStatus status) {
         this.salesStatus = status;
@@ -120,13 +128,11 @@ public class Sales extends BaseEntity {
         if (sales.getSalesStatus() != null) this.salesStatus = sales.getSalesStatus();
         if (sales.getArtists() != null) this.artists = sales.getArtists();
         if (sales.getTeams() != null) this.teams = sales.getTeams();
-        if (sales.getHashtags() != null) this.hashtags = sales.getHashtags();
         if (sales.getAccount() != null) this.account = sales.getAccount();
     }
 
-    public void setHashtag(List<Artist> artists, List<Team> teams, List<Hashtag> hashtags) {
+    public void setHashtag(List<Artist> artists, List<Team> teams) {
         if (artists != null) this.artists = artists;
         if (teams != null) this.teams = teams;
-        if (hashtags != null) this.hashtags = hashtags;
     }
 }

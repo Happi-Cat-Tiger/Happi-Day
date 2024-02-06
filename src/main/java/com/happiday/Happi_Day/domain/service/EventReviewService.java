@@ -51,7 +51,7 @@ public class EventReviewService {
         // 진행되지 않은 이벤트인지 검증
         boolean isEventStarted = event.getStartTime().isBefore(LocalDateTime.now());
 
-        if (isEventStarted) {
+        if (!isEventStarted) {
             throw new CustomException(ErrorCode.EVENT_NOT_STARTED);
         }
 
@@ -134,6 +134,7 @@ public class EventReviewService {
         if (imageFiles != null && !imageFiles.isEmpty()) {
             log.info("이미지 있음 ");
             imageRepository.deleteAll(review.getImages());
+//            review.getImages().clear();
 
             List<String> imageUrls = fileUtils.uploadFiles(imageFiles);
             List<ReviewImage> reviewImages = imageUrls.stream()
@@ -143,6 +144,7 @@ public class EventReviewService {
                             .build())
                     .collect(Collectors.toList());
             review.setImages(reviewImages);
+
         }
 
         review.update(request.toEntity());

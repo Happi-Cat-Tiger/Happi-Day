@@ -39,6 +39,7 @@ public class MailService {
         try {
             javaMailSender.send(message);
         } catch (MailException es) {
+            log.info(es.getMessage());
             throw new CustomException(ErrorCode.MAIL_SEND_ERROR);
         }
     }

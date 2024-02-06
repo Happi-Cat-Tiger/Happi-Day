@@ -45,16 +45,7 @@ public class UserAuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<String> registerUser(@Validated @RequestBody UserRegisterDto dto) {
-        CustomUserDetails userDetails = CustomUserDetails.builder()
-                .username(dto.getUsername())
-                .password(passwordEncoder.encode(dto.getPassword()))
-                .nickname(dto.getNickname())
-                .realname(dto.getRealname())
-                .phone(dto.getPhone())
-                .role(RoleType.USER)
-                .imageUrl(defaultImageUtils.getDefaultImageUrlUserProfile())
-                .build();
-        manager.createUser(userDetails);
+        userService.createUser(dto);
         return new ResponseEntity<>("회원가입을 완료했습니다.", HttpStatus.CREATED);
     }
 
@@ -84,15 +75,7 @@ public class UserAuthController {
 
     @PostMapping("/admin")
     public ResponseEntity<?> registerAdmin(@Validated @RequestBody UserRegisterDto dto) {
-        CustomUserDetails userDetails = CustomUserDetails.builder()
-                .username(dto.getUsername())
-                .password(passwordEncoder.encode(dto.getPassword()))
-                .nickname(dto.getNickname())
-                .realname(dto.getRealname())
-                .phone(dto.getPhone())
-                .role(RoleType.ADMIN)
-                .build();
-        manager.createUser(userDetails);
+        userService.createAdmin(dto);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 

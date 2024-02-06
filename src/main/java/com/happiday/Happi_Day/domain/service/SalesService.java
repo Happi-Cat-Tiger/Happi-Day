@@ -39,6 +39,8 @@ public class SalesService {
     private final FileUtils fileUtils;
     private final QuerySalesRepository querySalesRepository;
     private final RedisService redisService;
+    private final SalesLikeRepository salesLikeRepository;
+    private final SalesHashtagRepository salesHashtagRepository;
 
     @Transactional
     public ReadOneSalesDto createSales(Long categoryId, WriteSalesDto dto, MultipartFile thumbnailImage, List<MultipartFile> imageFile, String username) {
@@ -58,9 +60,10 @@ public class SalesService {
                 .salesStatus(SalesStatus.ON_SALE)
                 .salesCategory(category)
                 .name(dto.getName())
+                .salesHashtags(new ArrayList<>())
                 .description(dto.getDescription())
                 .products(productList)
-                .salesLikesUsers(new ArrayList<>())
+                .salesLikes(new ArrayList<>())
                 .imageUrl(new ArrayList<>())
                 .account(dto.getAccount())
                 .startTime(dto.getStartTime())
@@ -90,10 +93,19 @@ public class SalesService {
             Hashtag newHashtag = Hashtag.builder()
                     .tag(keyword)
                     .build();
+            hashtagRepository.save(newHashtag);
             hashtags.add(newHashtag);
         }
 
-        newSales.setHashtag(artists, teams, hashtags);
+        for (Hashtag hashtag: hashtags) {
+            SalesHashtag salesHashtag = SalesHashtag.builder()
+                    .hashtag(hashtag)
+                    .sales(newSales)
+                    .build();
+            salesHashtagRepository.save(salesHashtag);
+        }
+
+        newSales.setHashtag(artists, teams);
 
         // 이미지 저장
         if (thumbnailImage != null && !thumbnailImage.isEmpty()) {
@@ -125,11 +137,12 @@ public class SalesService {
         return salesList.map(ReadListSalesDto::fromEntity);
     }
 
-    public Page<ReadListSalesDto> readSalesList(Long categoryId, Pageable pageable) {
+    // 판매글 목록 조회
+    public Page<ReadListSalesDto> readSalesList(Long categoryId, Pageable pageable, String filter, String keyword) {
         SalesCategory category = salesCategoryRepository.findById(categoryId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
 
-        Page<Sales> salesList = salesRepository.findAllBySalesCategory(category, pageable);
+        Page<Sales> salesList = querySalesRepository.findSalesByFilterAndKeyword(pageable, categoryId, filter, keyword);
         return salesList.map(ReadListSalesDto::fromEntity);
     }
 
@@ -164,7 +177,7 @@ public class SalesService {
         Sales sales = salesRepository.findById(salesId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SALES_NOT_FOUND));
 
-        if(redisService.isFirstIpRequest(clientAddress, salesId)){
+        if (redisService.isFirstIpRequest(clientAddress, salesId)) {
             log.debug("same user requests duplicate in 24hours: {}, {}", clientAddress, salesId);
             increaseViewCount(clientAddress, salesId);
         }
@@ -226,7 +239,15 @@ public class SalesService {
             hashtags.add(newHashtag);
         }
 
-        sales.setHashtag(artists, teams, hashtags);
+        for (Hashtag hashtag: hashtags) {
+            SalesHashtag salesHashtag = SalesHashtag.builder()
+                    .hashtag(hashtag)
+                    .sales(sales)
+                    .build();
+            salesHashtagRepository.save(salesHashtag);
+        }
+
+        sales.setHashtag(artists, teams);
 
         if (thumbnailImage != null && !thumbnailImage.isEmpty()) {
             if (sales.getThumbnailImage() != null && !sales.getThumbnailImage().isEmpty()) {
@@ -333,20 +354,26 @@ public class SalesService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         String resposne = "";
-        if (sales.getSalesLikesUsers().contains(user)) {
-            sales.getSalesLikesUsers().remove(user);
-            user.getSalesLikes().remove(sales);
-            resposne = "찜하기가 취소되었습니다. 현재 찜하기 수 : " + sales.getSalesLikesUsers().size();
+        Optional<SalesLike> salesLike = salesLikeRepository.findByUserAndSales(user, sales);
+
+        if (salesLike.isPresent()) {
+            salesLikeRepository.delete(salesLike.get());
+            List<SalesLike> salesLikeUser = salesLikeRepository.findBySales(sales);
+            resposne = "찜하기가 취소되었습니다. 현재 찜하기 수 : " + salesLikeUser.size();
         } else {
-            sales.getSalesLikesUsers().add(user);
-            user.getSalesLikes().add(sales);
-            resposne = "찜하기를 눌렀습니다. 현재 찜하기 수 : " + sales.getSalesLikesUsers().size();
+            SalesLike newSalesLike = SalesLike.builder()
+                    .sales(sales)
+                    .user(user)
+                    .build();
+            salesLikeRepository.save(newSalesLike);
+            List<SalesLike> salesLikeUser = salesLikeRepository.findBySales(sales);
+            resposne = "찜하기를 눌렀습니다. 현재 찜하기 수 : " + salesLikeUser.size();
         }
         return resposne;
     }
 
     @Transactional
-    public void increaseViewCount(String clientAddress, Long salesId){
+    public void increaseViewCount(String clientAddress, Long salesId) {
         salesRepository.increaseViewCount(salesId);
         redisService.clientRequest(clientAddress, salesId);
     }

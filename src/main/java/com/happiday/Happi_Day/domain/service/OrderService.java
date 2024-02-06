@@ -41,8 +41,13 @@ public class OrderService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Sales sales = salesRepository.findById(salesId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SALES_NOT_FOUND));
+
         Delivery delivery = deliveryRepository.findByName(orderRequest.getDelivery().toString())
                 .orElseThrow(() -> new CustomException(ErrorCode.DELIVERY_NOT_FOUND));
+        if(!sales.getDeliveries().contains(delivery)){
+            throw new CustomException(ErrorCode.DELIVERY_NOT_FOUND);
+        }
+
 
         Order newOrder = Order.builder()
                 .user(user)
@@ -119,8 +124,8 @@ public class OrderService {
 
         if (!user.equals(order.getUser())) throw new CustomException(ErrorCode.FORBIDDEN);
 
-        // 배송중이거나 배송완료일 경우 취소 불가
-        if (order.getOrderStatus().equals(OrderStatus.DELIVERING) || order.getOrderStatus().equals(OrderStatus.DELIVERY_COMPLETED)) {
+        // 주문취소, 배송준비중, 배송중, 배송완료 상태일 경우 취소 불가
+        if (order.getOrderStatus().equals(OrderStatus.DELIVERING) || order.getOrderStatus().equals(OrderStatus.DELIVERY_COMPLETED) || order.getOrderStatus().equals(OrderStatus.READY_TO_SHIP) || order.getOrderStatus().equals(OrderStatus.ORDER_CANCEL)) {
             throw new CustomException(ErrorCode.ORDER_FAILED);
         }
 

@@ -3,13 +3,13 @@ package com.happiday.Happi_Day.domain.entity.product.dto;
 import com.happiday.Happi_Day.domain.entity.article.Hashtag;
 import com.happiday.Happi_Day.domain.entity.artist.Artist;
 import com.happiday.Happi_Day.domain.entity.product.Sales;
+import com.happiday.Happi_Day.domain.entity.product.SalesHashtag;
 import com.happiday.Happi_Day.domain.entity.team.Team;
 import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,14 +36,9 @@ public class ReadOneSalesDto {
         List<String> keywords = new ArrayList<>();
         keywords.addAll(sales.getArtists().stream().map(Artist::getName).collect(Collectors.toList()));
         keywords.addAll(sales.getTeams().stream().map(Team::getName).collect(Collectors.toList()));
-        keywords.addAll(sales.getHashtags().stream().map(Hashtag::getTag).collect(Collectors.toList()));
+        keywords.addAll(sales.getSalesHashtags().stream().map(SalesHashtag::getHashtag).map(Hashtag::getTag).collect(Collectors.toList()));
 
         List<ReadDeliveryDto> deliveries = sales.getDeliveries() != null ? sales.getDeliveries().stream().map(ReadDeliveryDto::fromEntity).collect(Collectors.toList()) : Collections.emptyList();
-
-        List<String> hashtagList = new ArrayList<>();
-        for (Hashtag hashtag : sales.getHashtags()) {
-            hashtagList.add(hashtag.getTag());
-        }
 
         return ReadOneSalesDto.builder()
                 .id(sales.getId())
@@ -53,7 +48,7 @@ public class ReadOneSalesDto {
                 .description(sales.getDescription())
                 .salesStatus(sales.getSalesStatus().getValue())
                 .products(productList)
-                .likeNum(sales.getSalesLikesUsers().size())
+                .likeNum(sales.getSalesLikes().size())
                 .imageList(sales.getImageUrl())
                 .hashtag(keywords)
                 .deliveries(deliveries)

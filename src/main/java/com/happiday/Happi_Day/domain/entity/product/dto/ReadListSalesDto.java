@@ -26,7 +26,7 @@ public class ReadListSalesDto {
                 .salesCategory(sales.getSalesCategory().getName())
                 .name(sales.getName())
                 .user(sales.getUsers().getNickname())
-                .likeNum(sales.getSalesLikesUsers().size())
+                .likeNum(sales.getSalesLikes().size())
                 .thumbnailImage(sales.getThumbnailImage())
                 .orderNum(sales.getOrders().size())
                 .startTime(sales.getStartTime())

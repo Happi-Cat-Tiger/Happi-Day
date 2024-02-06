@@ -2,8 +2,11 @@ package com.happiday.Happi_Day.domain.repository;
 
 import com.happiday.Happi_Day.domain.entity.article.Article;
 import com.happiday.Happi_Day.domain.entity.artist.Artist;
+import com.happiday.Happi_Day.domain.entity.artist.ArtistSubscription;
 import com.happiday.Happi_Day.domain.entity.team.Team;
+import com.happiday.Happi_Day.domain.entity.team.TeamSubscription;
 import com.happiday.Happi_Day.domain.entity.user.User;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -27,11 +30,18 @@ public class QueryArticleRepository {
     private final JPAQueryFactory queryFactory;
 
     // 필터링
-    public Page<Article> findArticleByFilterAndKeyword(Pageable pageable, String filter, String keyword) {
+    public Page<Article> findArticleByFilterAndKeyword(Pageable pageable,Long categoryId,  String filter, String keyword) {
+        BooleanBuilder whereClause = new BooleanBuilder();
+        whereClause.and(articleSearchFilter(filter, keyword));
+
+        if (categoryId != null) {
+            whereClause.and(article.category.id.eq(categoryId));
+        }
+
         List<Article> articleList = queryFactory
                 .selectFrom(article)
                 .join(article.user, user).fetchJoin()
-                .where(articleSearchFilter(filter, keyword))
+                .where(whereClause)
                 .orderBy(article.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -83,16 +93,18 @@ public class QueryArticleRepository {
     }
 
     private BooleanExpression subscribedArtistsCondition(User loginUser) {
-        List<Long> artistIds = loginUser.getSubscribedArtists().stream()
+        List<Long> artistIds = loginUser.getArtistSubscriptionList().stream()
+                .map(ArtistSubscription::getArtist)
                 .map(Artist::getId)
                 .toList();
 
-        List<Long> teamIds = loginUser.getSubscribedTeams().stream()
+        List<Long> teamIds = loginUser.getTeamSubscriptionList().stream()
+                .map(TeamSubscription::getTeam)
                 .map(Team::getId)
                 .toList();
 
-        return article.artists.any().id.in(artistIds)
-                .or(article.teams.any().id.in(teamIds));
+        return article.artistArticleList.any().id.in(artistIds)
+                .or(article.teamArticleList.any().id.in(teamIds));
 
     }
 }

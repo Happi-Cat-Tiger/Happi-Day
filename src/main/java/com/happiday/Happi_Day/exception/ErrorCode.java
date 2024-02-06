@@ -43,6 +43,9 @@ public enum ErrorCode {
     // team
     TEAM_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 팀을 찾을 수 없습니다."),
 
+    // subscription
+    SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "구독 정보를 찾을 수 없습니다."),
+
     // event
     EVENT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 이벤트를 찾을 수 없습니다."),
     EVENT_ALREADY_DELETED(HttpStatus.NOT_FOUND, "이미 삭제된 이벤트입니다."),
@@ -66,6 +69,8 @@ public enum ErrorCode {
     CODE_NOT_MATCHED(HttpStatus.BAD_REQUEST, "코드가 일치하지 않습니다."),
     NICKNAME_CONFLICT(HttpStatus.CONFLICT, "중복된 닉네임입니다."),
     PHONE_CONFLICT(HttpStatus.CONFLICT, "중복된 전화번호입니다."),
+    PHONE_FORMAT_ERROR(HttpStatus.BAD_REQUEST, "전화번호 형식이 유효하지 않습니다. 000-0000-0000 형식으로 입력해주세요."),
+    EMAIL_FORMAT_ERROR(HttpStatus.BAD_REQUEST, "이메일 형식이 유효하지 않습니다."),
 
     // chat
     CHATROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 채팅방입니다."),

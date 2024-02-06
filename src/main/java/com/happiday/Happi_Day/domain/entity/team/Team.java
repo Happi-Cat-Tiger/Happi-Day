@@ -1,11 +1,8 @@
 package com.happiday.Happi_Day.domain.entity.team;
 
 import com.happiday.Happi_Day.domain.entity.BaseEntity;
-import com.happiday.Happi_Day.domain.entity.article.Article;
 import com.happiday.Happi_Day.domain.entity.artist.Artist;
-import com.happiday.Happi_Day.domain.entity.event.Event;
 import com.happiday.Happi_Day.domain.entity.product.Sales;
-import com.happiday.Happi_Day.domain.entity.user.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -40,20 +37,20 @@ public class Team extends BaseEntity {
     private List<Artist> artists = new ArrayList<>();
 
     // 이벤트
-    @ManyToMany(mappedBy = "teams")
-    private List<Event> events = new ArrayList<>();
+    @OneToMany(mappedBy = "team")
+    private List<TeamEvent> events = new ArrayList<>();
 
     // 판매글
     @ManyToMany(mappedBy = "teams")
     private List<Sales> salesList = new ArrayList<>();
 
     // 유저 구독
-    @ManyToMany(mappedBy = "subscribedTeams")
-    private List<User> subscribers = new ArrayList<>();
+    @OneToMany(mappedBy = "team")
+    private List<TeamSubscription> subscribers = new ArrayList<>();
 
     // 게시판
-    @ManyToMany(mappedBy = "teams")
-    private List<Article> articles = new ArrayList<>();
+    @OneToMany(mappedBy = "team")
+    private List<TeamArticle> teamArticleList = new ArrayList<>();
 
     public void update(Team teamUpdate) {
         this.name  = teamUpdate.getName();

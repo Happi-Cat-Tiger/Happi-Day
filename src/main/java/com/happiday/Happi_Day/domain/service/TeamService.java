@@ -4,12 +4,15 @@ import com.happiday.Happi_Day.domain.entity.artist.dto.ArtistListResponseDto;
 import com.happiday.Happi_Day.domain.entity.event.dto.EventListResponseDto;
 import com.happiday.Happi_Day.domain.entity.product.dto.SalesListResponseDto;
 import com.happiday.Happi_Day.domain.entity.team.Team;
+import com.happiday.Happi_Day.domain.entity.team.TeamEvent;
+import com.happiday.Happi_Day.domain.entity.team.TeamSubscription;
 import com.happiday.Happi_Day.domain.entity.team.dto.TeamListResponseDto;
 import com.happiday.Happi_Day.domain.entity.team.dto.TeamRegisterDto;
 import com.happiday.Happi_Day.domain.entity.team.dto.TeamDetailResponseDto;
 import com.happiday.Happi_Day.domain.entity.team.dto.TeamUpdateDto;
 import com.happiday.Happi_Day.domain.entity.user.User;
 import com.happiday.Happi_Day.domain.repository.TeamRepository;
+import com.happiday.Happi_Day.domain.repository.TeamSubscriptionRepository;
 import com.happiday.Happi_Day.domain.repository.UserRepository;
 import com.happiday.Happi_Day.exception.CustomException;
 import com.happiday.Happi_Day.exception.ErrorCode;
@@ -32,6 +35,7 @@ import java.util.stream.Collectors;
 public class TeamService {
 
     private final TeamRepository teamRepository;
+    private final TeamSubscriptionRepository teamSubscriptionRepository;
     private final FileUtils fileUtils;
     private final UserRepository userRepository;
     private final DefaultImageUtils defaultImageUtils;
@@ -83,7 +87,9 @@ public class TeamService {
         team.update(requestDto.toEntity());
         teamRepository.save(team);
 
-        boolean isSubscribed = user.getSubscribedTeams().contains(team);
+        // 구독 여부 확인
+        boolean isSubscribed = teamSubscriptionRepository.existsByUserAndTeam(user, team);
+
         // 팀에 소속된 아티스트 정보 가져오기
         List<ArtistListResponseDto> artists = team.getArtists().stream()
                 .map(ArtistListResponseDto::of)
@@ -105,7 +111,7 @@ public class TeamService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
-        boolean isSubscribed = user.getSubscribedTeams().contains(team);
+        boolean isSubscribed = teamSubscriptionRepository.existsByUserAndTeam(user, team);
 
         // 팀에 소속된 아티스트 정보 가져오기
         List<ArtistListResponseDto> artists = team.getArtists().stream()
@@ -119,6 +125,7 @@ public class TeamService {
 
         // 관련 이벤트 조회
         List<EventListResponseDto> events = team.getEvents().stream()
+                .map(TeamEvent::getEvent)
                 .map(EventListResponseDto::fromEntity)
                 .collect(Collectors.toList());
 
@@ -158,6 +165,7 @@ public class TeamService {
                 .orElseThrow(() -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
 
         return team.getEvents().stream()
+                .map(TeamEvent::getEvent)
                 .map(EventListResponseDto::fromEntity)
                 .collect(Collectors.toList());
     }
@@ -169,9 +177,15 @@ public class TeamService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
-        if (!user.getSubscribedTeams().contains(team)) {
-            user.getSubscribedTeams().add(team);
-            userRepository.save(user);
+
+        boolean isSubscribed = teamSubscriptionRepository.existsByUserAndTeam(user, team);
+
+        if (!isSubscribed) {
+            TeamSubscription subscription = TeamSubscription.builder()
+                    .user(user)
+                    .team(team)
+                    .build();
+            teamSubscriptionRepository.save(subscription);
         }
     }
 
@@ -182,7 +196,10 @@ public class TeamService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
-        user.getSubscribedTeams().remove(team);
-        userRepository.save(user);
+
+        TeamSubscription teamSubscription = teamSubscriptionRepository.findByUserAndTeam(user, team)
+                .orElseThrow(() -> new CustomException(ErrorCode.SUBSCRIPTION_NOT_FOUND));
+
+        teamSubscriptionRepository.delete(teamSubscription);
     }
 }

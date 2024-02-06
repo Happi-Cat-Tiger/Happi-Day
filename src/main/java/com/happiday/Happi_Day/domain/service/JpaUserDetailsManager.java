@@ -7,12 +7,10 @@ import com.happiday.Happi_Day.exception.CustomException;
 import com.happiday.Happi_Day.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Slf4j
 @Service
@@ -33,10 +31,9 @@ public class JpaUserDetailsManager implements UserDetailsManager {
     }
 
     @Override
-    public void createUser(UserDetails user) {
-        if (this.userExists(user.getUsername()))
-            throw new CustomException(ErrorCode.USER_CONFLICT);
-        userRepository.save(((CustomUserDetails) user).newEntity());
+    public void createUser(UserDetails userDetails) {
+        User user = ((CustomUserDetails) userDetails).newEntity();
+        userRepository.save(user);
     }
 
     @Override
@@ -53,5 +50,4 @@ public class JpaUserDetailsManager implements UserDetailsManager {
     public void changePassword(String oldPassword, String newPassword) {
 
     }
-
 }

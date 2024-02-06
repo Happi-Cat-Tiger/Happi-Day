@@ -1,6 +1,8 @@
 package com.happiday.Happi_Day.domain.service;
 
 import com.happiday.Happi_Day.domain.entity.artist.Artist;
+import com.happiday.Happi_Day.domain.entity.artist.ArtistEvent;
+import com.happiday.Happi_Day.domain.entity.artist.ArtistSubscription;
 import com.happiday.Happi_Day.domain.entity.artist.dto.ArtistListResponseDto;
 import com.happiday.Happi_Day.domain.entity.artist.dto.ArtistRegisterDto;
 import com.happiday.Happi_Day.domain.entity.artist.dto.ArtistDetailResponseDto;
@@ -11,6 +13,7 @@ import com.happiday.Happi_Day.domain.entity.team.dto.TeamListResponseDto;
 import com.happiday.Happi_Day.domain.entity.product.dto.SalesListResponseDto;
 import com.happiday.Happi_Day.domain.entity.user.User;
 import com.happiday.Happi_Day.domain.repository.ArtistRepository;
+import com.happiday.Happi_Day.domain.repository.ArtistSubscriptionRepository;
 import com.happiday.Happi_Day.domain.repository.TeamRepository;
 import com.happiday.Happi_Day.domain.repository.UserRepository;
 import com.happiday.Happi_Day.exception.CustomException;
@@ -23,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,6 +40,7 @@ public class ArtistService {
     private final ArtistRepository artistRepository;
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
+    private final ArtistSubscriptionRepository subscriptionRepository;
     private final FileUtils fileUtils;
     private final DefaultImageUtils defaultImageUtils;
 
@@ -124,7 +129,7 @@ public class ArtistService {
                 .orElseThrow(() -> new CustomException(ErrorCode.ARTIST_NOT_FOUND));
 
         // 구독 여부 확인
-        boolean isSubscribed = user.getSubscribedArtists().contains(artist);
+        boolean isSubscribed = subscriptionRepository.existsByUserAndArtist(user, artist);
 
         // 아티스트가 속한 팀 정보 가져오기
         List<TeamListResponseDto> teams = artist.getTeams().stream()
@@ -138,6 +143,7 @@ public class ArtistService {
 
         // 관련 이벤트 조회
         List<EventListResponseDto> events = artist.getEvents().stream()
+                .map(ArtistEvent::getEvent)
                 .map(EventListResponseDto::fromEntity)
                 .collect(Collectors.toList());
 
@@ -177,6 +183,7 @@ public class ArtistService {
                 .orElseThrow(() -> new CustomException(ErrorCode.ARTIST_NOT_FOUND));
 
         return artist.getEvents().stream()
+                .map(ArtistEvent::getEvent)
                 .map(EventListResponseDto::fromEntity)
                 .collect(Collectors.toList());
     }
@@ -188,9 +195,16 @@ public class ArtistService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Artist artist = artistRepository.findById(artistId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ARTIST_NOT_FOUND));
-        if (!user.getSubscribedArtists().contains(artist)) {
-            user.getSubscribedArtists().add(artist);
-            userRepository.save(user);
+
+        boolean isAlreadySubscribed = subscriptionRepository.existsByUserAndArtist(user, artist);
+
+        if (!isAlreadySubscribed) {
+            ArtistSubscription subscription = ArtistSubscription.builder()
+                    .user(user)
+                    .artist(artist)
+                    .subscribedAt(LocalDateTime.now())
+                    .build();
+            subscriptionRepository.save(subscription);
         }
     }
 
@@ -201,8 +215,11 @@ public class ArtistService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Artist artist = artistRepository.findById(artistId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ARTIST_NOT_FOUND));
-        user.getSubscribedArtists().remove(artist);
-        userRepository.save(user);
+
+        ArtistSubscription artistSubscription = subscriptionRepository.findByUserAndArtist(user, artist)
+                .orElseThrow(() -> new CustomException(ErrorCode.SUBSCRIPTION_NOT_FOUND));
+
+        subscriptionRepository.delete(artistSubscription);
     }
 
     // 팀을 DTO로 변환하는 유틸리티 메서드

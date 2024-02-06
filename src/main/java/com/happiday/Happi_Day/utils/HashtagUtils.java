@@ -4,23 +4,25 @@ import com.happiday.Happi_Day.domain.entity.article.Hashtag;
 import com.happiday.Happi_Day.domain.entity.artist.Artist;
 import com.happiday.Happi_Day.domain.entity.team.Team;
 import com.happiday.Happi_Day.domain.repository.ArtistRepository;
+import com.happiday.Happi_Day.domain.repository.HashtagRepository;
 import com.happiday.Happi_Day.domain.repository.TeamRepository;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class HashtagUtils {
 
     private final ArtistRepository artistRepository;
     private final TeamRepository teamRepository;
+    private final HashtagRepository hashtagRepository;
 
-    public HashtagUtils(ArtistRepository artistRepository, TeamRepository teamRepository) {
+    public HashtagUtils(ArtistRepository artistRepository, TeamRepository teamRepository, HashtagRepository hashtagRepository) {
         this.artistRepository = artistRepository;
         this.teamRepository = teamRepository;
+        this.hashtagRepository = hashtagRepository;
     }
 
     public Triple<List<Artist>, List<Team>, List<Hashtag>> processTags(List<String> hashtagRequests) {
@@ -29,16 +31,30 @@ public class HashtagUtils {
         List<Hashtag> hashtags = new ArrayList<>();
 
         for (String hashtagRequest : hashtagRequests) {
-            Optional<Artist> existingArtist = artistRepository.findByName(hashtagRequest);
-            Optional<Team> existingTeam = teamRepository.findByName(hashtagRequest);
-            if (existingArtist.isPresent()) {
-                artists.add(existingArtist.get());
-            } else if (existingTeam.isPresent()) {
-                teams.add(existingTeam.get());
-            } else {
-                hashtags.add(Hashtag.builder().tag(hashtagRequest).build());
+            boolean isFound = artistRepository.findByName(hashtagRequest)
+                    .map(artists::add)
+                    .isPresent();
+
+            if (!isFound) {
+                isFound = teamRepository.findByName(hashtagRequest)
+                        .map(teams::add)
+                        .isPresent();
+            }
+
+            if (!isFound) {
+                hashtagRepository.findByTag(hashtagRequest)
+                        .ifPresentOrElse(
+                                hashtags::add,
+                                () -> {
+                                    Hashtag newHashtag = Hashtag.builder()
+                                            .tag(hashtagRequest)
+                                            .build();
+                                    hashtagRepository.save(newHashtag);
+                                    hashtags.add(newHashtag);
+                                });
             }
         }
+
         return Triple.of(artists, teams, hashtags);
     }
 }

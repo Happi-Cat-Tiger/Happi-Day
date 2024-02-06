@@ -149,3 +149,4 @@ intellij-java-google-style.xml
 
 ### file ###
 /temp
+/src/main/generated/

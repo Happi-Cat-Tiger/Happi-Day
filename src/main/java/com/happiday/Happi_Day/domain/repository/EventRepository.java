@@ -13,10 +13,6 @@ public interface EventRepository extends JpaRepository<Event, Long>, EventCustom
 
     Page<Event> findAllByUser(User user, Pageable pageable);
 
-    Page<Event> findAllByLikesContains(User user, Pageable pageable);
-
-    Page<Event> findAllByJoinListContains(User user, Pageable pageable);
-
     boolean existsByTitle(String title);
 
     //조회수 count

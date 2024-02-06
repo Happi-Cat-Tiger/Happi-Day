@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface TeamRepository extends JpaRepository<Team, Long> {
     Optional<Team> findByName(String teamName);
 
-    @Query("SELECT t FROM Team t WHERE t.id NOT IN (SELECT ut.id FROM User u JOIN u.subscribedTeams ut WHERE u.id = :userId)")
+    @Query("SELECT t FROM Team t WHERE t.id NOT IN (SELECT ut.id FROM User u JOIN u.teamSubscriptionList ut WHERE u.id = :userId)")
     Page<Team> findUnsubscribedTeams(@Param("userId") Long userId, Pageable pageable);
 
     boolean existsByName(String name);

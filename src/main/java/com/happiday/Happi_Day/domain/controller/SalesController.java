@@ -80,8 +80,10 @@ public class SalesController {
     @GetMapping("/{categoryId}")
     public ResponseEntity<Page<ReadListSalesDto>> readSalesList(
             @PathVariable("categoryId") Long id,
-            @PageableDefault(size = 12, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<ReadListSalesDto> responseSalesList = salesService.readSalesList(id, pageable);
+            @PageableDefault(size = 12, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(required = false) String filter,
+            @RequestParam(required = false) String keyword) {
+        Page<ReadListSalesDto> responseSalesList = salesService.readSalesList(id, pageable, filter, keyword);
         return new ResponseEntity<>(responseSalesList, HttpStatus.OK);
     }
 

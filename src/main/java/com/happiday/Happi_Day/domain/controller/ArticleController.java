@@ -1,10 +1,8 @@
 package com.happiday.Happi_Day.domain.controller;
 
-import com.happiday.Happi_Day.domain.entity.article.Article;
 import com.happiday.Happi_Day.domain.entity.article.dto.ReadListArticleDto;
 import com.happiday.Happi_Day.domain.entity.article.dto.ReadOneArticleDto;
 import com.happiday.Happi_Day.domain.entity.article.dto.WriteArticleDto;
-import com.happiday.Happi_Day.domain.entity.product.dto.ReadListSalesDto;
 import com.happiday.Happi_Day.domain.service.ArticleService;
 import com.happiday.Happi_Day.utils.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -55,8 +53,10 @@ public class ArticleController {
     @GetMapping("/{categoryId}/list")
     public ResponseEntity<Page<ReadListArticleDto>> readList(
             @PathVariable("categoryId") Long categoryId,
-            @PageableDefault(size = 12, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<ReadListArticleDto> responseArticles = articleService.readList(categoryId, pageable);
+            @PageableDefault(size = 12, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(required = false) String filter,
+            @RequestParam(required = false) String keyword) {
+        Page<ReadListArticleDto> responseArticles = articleService.readList(categoryId, pageable, filter, keyword);
         return new ResponseEntity<>(responseArticles, HttpStatus.OK);
     }
 
@@ -77,8 +77,10 @@ public class ArticleController {
     // 글 전체글 조회
     @GetMapping()
     public ResponseEntity<Page<ReadListArticleDto>> readAllArticles(
-            @PageableDefault(size = 12, sort = "id", direction = Sort.Direction.DESC) Pageable pageable){
-        Page<ReadListArticleDto> responseArticles = articleService.readList(pageable);
+            @PageableDefault(size = 12, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(required = false) String filter,
+            @RequestParam(required = false) String keyword){
+        Page<ReadListArticleDto> responseArticles = articleService.readList(pageable, filter, keyword);
         return new ResponseEntity<>(responseArticles, HttpStatus.OK);
     }
 

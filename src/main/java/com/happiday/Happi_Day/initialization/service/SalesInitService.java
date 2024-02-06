@@ -32,7 +32,7 @@ public class SalesInitService {
     public void initSales() {
         User seller = userRepository.findById(2L).orElse(null);
         SalesCategory category1 = salesCategoryRepository.findById(1L).orElse(null);
-        SalesCategory category2 = salesCategoryRepository.findById(1L).orElse(null);
+        SalesCategory category2 = salesCategoryRepository.findById(2L).orElse(null);
         Artist artist1 = artistRepository.findById(1L).orElse(null);
         Artist artist2 = artistRepository.findById(2L).orElse(null);
         Artist artist3 = artistRepository.findById(3L).orElse(null);
