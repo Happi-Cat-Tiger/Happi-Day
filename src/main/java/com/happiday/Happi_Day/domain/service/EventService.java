@@ -67,8 +67,6 @@ public class EventService {
 
         String imageUrl = fileUtils.uploadFile(imageFile);
 
-        // hashTag 처리
-        //get Left, Middle, Right가 각각 1, 2, 3번째 요소 반환
         HashtagUtils hashtagUtils = new HashtagUtils(artistRepository, teamRepository, hashtagRepository);
         Triple<List<Artist>, List<Team>, List<Hashtag>> processedTags = hashtagUtils.processTags(request.getHashtags());
 
@@ -188,8 +186,6 @@ public class EventService {
             event.setImageUrl(newImageUrl);
         }
 
-        // hashTag 처리
-        //get Left, Middle, Right가 각각 1, 2, 3번째 요소 반환
         HashtagUtils hashtagUtils = new HashtagUtils(artistRepository, teamRepository, hashtagRepository);
         Triple<List<Artist>, List<Team>, List<Hashtag>> processedTags = hashtagUtils.processTags(request.getHashtags());
 
