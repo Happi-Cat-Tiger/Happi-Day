@@ -14,7 +14,9 @@ import com.happiday.Happi_Day.domain.repository.*;
 import com.happiday.Happi_Day.exception.CustomException;
 import com.happiday.Happi_Day.exception.ErrorCode;
 import com.happiday.Happi_Day.utils.FileUtils;
+import com.happiday.Happi_Day.utils.HashtagUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,11 +60,16 @@ public class ArticleService {
         BoardCategory category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
 
+        HashtagUtils hashtagUtils = new HashtagUtils(artistRepository, teamRepository, hashtagRepository);
+        Triple<List<Artist>, List<Team>, List<Hashtag>> processedTags = hashtagUtils.processTags(dto.getHashtag());
+
         Article newArticle = Article.builder()
                 .user(user)
                 .category(category)
                 .title(dto.getTitle())
                 .content(dto.getContent())
+                .artistArticleList(new ArrayList<>())
+                .teamArticleList(new ArrayList<>())
                 .articleHashtags(new ArrayList<>())
                 .eventAddress(dto.getEventAddress())
                 .articleLikes(new ArrayList<>())
@@ -70,54 +77,42 @@ public class ArticleService {
                 .imageUrl(new ArrayList<>())
                 .build();
 
-        articleRepository.save(newArticle);
+        List<ArticleHashtag> articleHashtags = new ArrayList<>();
+        List<Hashtag> hashtags = processedTags.getRight();
 
-        List<ArtistArticle> artistArticleList = new ArrayList<>();
-        List<TeamArticle> teamArticleList = new ArrayList<>();
-        List<Hashtag> hashtags = new ArrayList<>();
-
-        for (String keyword : dto.getHashtag()) {
-            Optional<Artist> artist = artistRepository.findByName(keyword);
-            if (artist.isPresent()) {
-                ArtistArticle artistArticle = ArtistArticle.builder()
-                        .article(newArticle)
-                        .artist(artist.get())
-                        .build();
-                artistArticleRepository.save(artistArticle);
-                artistArticleList.add(artistArticle);
-                continue;
-            }
-            Optional<Team> team = teamRepository.findByName(keyword);
-            if (team.isPresent()) {
-                TeamArticle teamArticle = TeamArticle.builder()
-                        .article(newArticle)
-                        .team(team.get())
-                        .build();
-                teamArticleRepository.save(teamArticle);
-                teamArticleList.add(teamArticle);
-                continue;
-            }
-            Optional<Hashtag> hashtag = hashtagRepository.findByTag(keyword);
-            if (hashtag.isPresent()) {
-                hashtags.add(hashtag.get());
-                continue;
-            }
-            Hashtag newHashtag = Hashtag.builder()
-                    .tag(keyword)
-                    .build();
-            hashtagRepository.save(newHashtag);
-            hashtags.add(newHashtag);
-        }
-
-        for (Hashtag hashtag: hashtags) {
+        for (Hashtag hashtag : hashtags) {
             ArticleHashtag articleHashtag = ArticleHashtag.builder()
-                    .hashtag(hashtag)
                     .article(newArticle)
+                    .hashtag(hashtag)
                     .build();
+            articleHashtags.add(articleHashtag);
             articleHashtagRepository.save(articleHashtag);
         }
+        newArticle.setArticleHashtags(articleHashtags);
 
-        newArticle.setArtists(artistArticleList, teamArticleList);
+        articleRepository.save(newArticle);
+
+        // 아티스트와 게시글 관계 설정
+        List<Artist> artists = processedTags.getLeft();
+        for (Artist artist : artists) {
+            ArtistArticle artistArticle = ArtistArticle.builder()
+                    .article(newArticle)
+                    .artist(artist)
+                    .build();
+            artistArticleRepository.save(artistArticle);
+            newArticle.getArtistArticleList().add(artistArticle);
+        }
+
+        // 팀과 게시글 관계 설정
+        List<Team> teams = processedTags.getMiddle();
+        for (Team team : teams) {
+            TeamArticle teamArticle = TeamArticle.builder()
+                    .article(newArticle)
+                    .team(team)
+                    .build();
+            teamArticleRepository.save(teamArticle);
+            newArticle.getTeamArticleList().add(teamArticle);
+        }
 
         // 이미지 저장
         if (thumbnailImage != null && !thumbnailImage.isEmpty()) {
@@ -157,7 +152,7 @@ public class ArticleService {
         BoardCategory category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
 
-        Page<Article> articleList = queryArticleRepository.findArticleByFilterAndKeyword(pageable,categoryId, filter, keyword);
+        Page<Article> articleList = queryArticleRepository.findArticleByFilterAndKeyword(pageable, categoryId, filter, keyword);
         return articleList.map(ReadListArticleDto::fromEntity);
     }
 
@@ -168,14 +163,14 @@ public class ArticleService {
 
         User user = userRepository.findByUsername(username).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        Page<Article> articleList = queryArticleRepository.findArticleByFilterAndKeywordAndSubscribedArtists(pageable, filter, keyword, user);
+        Page<Article> articleList = queryArticleRepository.findArticleByFilterAndKeywordAndSubscribedArtists(pageable, id, filter, keyword, user);
 
         return articleList.map(ReadListArticleDto::fromEntity);
     }
 
     // 글 전체글 조회
     public Page<ReadListArticleDto> readList(Pageable pageable, String filter, String keyword) {
-        Page<Article> articles = queryArticleRepository.findArticleByFilterAndKeyword(pageable,null, filter, keyword);
+        Page<Article> articles = queryArticleRepository.findArticleByFilterAndKeyword(pageable, null, filter, keyword);
         return articles.map(ReadListArticleDto::fromEntity);
 
     }
@@ -190,62 +185,56 @@ public class ArticleService {
 
         if (!user.equals(article.getUser())) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 
+        HashtagUtils hashtagUtils = new HashtagUtils(artistRepository, teamRepository, hashtagRepository);
+        Triple<List<Artist>, List<Team>, List<Hashtag>> processedTags = hashtagUtils.processTags(dto.getHashtag());
+
+        if (processedTags.getRight() != null) {
+            articleHashtagRepository.deleteByArticle(article);
+            article.getArticleHashtags().clear();
+
+            List<Hashtag> hashtags = processedTags.getRight();
+            for (Hashtag hashtag : hashtags) {
+                ArticleHashtag articleHashtag = ArticleHashtag.builder()
+                        .article(article)
+                        .hashtag(hashtag)
+                        .build();
+                articleHashtagRepository.save(articleHashtag);
+                article.getArticleHashtags().add(articleHashtag);
+            }
+        }
+
         article.update(Article.builder()
                 .user(user)
                 .title(dto.getTitle())
                 .content(dto.getContent())
                 .eventAddress(dto.getEventAddress())
-                .build()
-        );
+                .build());
 
-        List<ArtistArticle> artistArticleList = new ArrayList<>();
-        List<TeamArticle> teamArticleList = new ArrayList<>();
-        List<Hashtag> hashtags = new ArrayList<>();
+        // 아티스트와 게시글 관계 설정
+        List<Artist> artists = processedTags.getLeft();
         artistArticleRepository.deleteByArticle(article);
-        teamArticleRepository.deleteByArticle(article);
-
-        for (String keyword : dto.getHashtag()) {
-            Optional<Artist> artist = artistRepository.findByName(keyword);
-            if (artist.isPresent()) {
-                article.getArtistArticleList().clear();
-                ArtistArticle artistArticle = ArtistArticle.builder()
-                        .article(article)
-                        .artist(artist.get())
-                        .build();
-                artistArticleRepository.save(artistArticle);
-                artistArticleList.add(artistArticle);
-                continue;
-            }
-            Optional<Team> team = teamRepository.findByName(keyword);
-            if (team.isPresent()) {
-                article.getTeamArticleList().clear();
-                TeamArticle teamArticle = TeamArticle.builder()
-                        .article(article)
-                        .team(team.get())
-                        .build();
-                teamArticleRepository.save(teamArticle);
-                teamArticleList.add(teamArticle);
-                continue;
-            }
-            Hashtag hashtag = hashtagRepository.findByTag(keyword)
-                    .orElseGet(() -> {
-                        Hashtag newHashtag = Hashtag.builder().tag(keyword).build();
-                        hashtagRepository.save(newHashtag);
-                        return newHashtag;
-                    });
-            hashtags.add(hashtag);
-        }
-
-        for (Hashtag hashtag: hashtags) {
-            ArticleHashtag articleHashtag = ArticleHashtag.builder()
-                    .hashtag(hashtag)
+        article.getArtistArticleList().clear();
+        for (Artist artist : artists) {
+            ArtistArticle artistArticle = ArtistArticle.builder()
                     .article(article)
+                    .artist(artist)
                     .build();
-            articleHashtagRepository.save(articleHashtag);
+            artistArticleRepository.save(artistArticle);
+            article.getArtistArticleList().add(artistArticle);
         }
 
-        article.setArtists(artistArticleList, teamArticleList);
-
+        // 팀과 게시글의 관계 설정
+        List<Team> teams = processedTags.getMiddle();
+        teamArticleRepository.deleteByArticle(article);
+        article.getTeamArticleList().clear();
+        for (Team team : teams) {
+            TeamArticle teamArticle = TeamArticle.builder()
+                    .article(article)
+                    .team(team)
+                    .build();
+            teamArticleRepository.save(teamArticle);
+            article.getTeamArticleList().add(teamArticle);
+        }
 
         // 썸네일 이미지 저장
         if (thumbnailImage != null && !thumbnailImage.isEmpty()) {

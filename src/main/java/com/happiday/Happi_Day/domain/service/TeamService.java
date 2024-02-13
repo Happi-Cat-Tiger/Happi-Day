@@ -1,10 +1,12 @@
 package com.happiday.Happi_Day.domain.service;
 
+import com.happiday.Happi_Day.domain.entity.artist.ArtistTeam;
 import com.happiday.Happi_Day.domain.entity.artist.dto.ArtistListResponseDto;
 import com.happiday.Happi_Day.domain.entity.event.dto.EventListResponseDto;
 import com.happiday.Happi_Day.domain.entity.product.dto.SalesListResponseDto;
 import com.happiday.Happi_Day.domain.entity.team.Team;
 import com.happiday.Happi_Day.domain.entity.team.TeamEvent;
+import com.happiday.Happi_Day.domain.entity.team.TeamSales;
 import com.happiday.Happi_Day.domain.entity.team.TeamSubscription;
 import com.happiday.Happi_Day.domain.entity.team.dto.TeamListResponseDto;
 import com.happiday.Happi_Day.domain.entity.team.dto.TeamRegisterDto;
@@ -91,7 +93,8 @@ public class TeamService {
         boolean isSubscribed = teamSubscriptionRepository.existsByUserAndTeam(user, team);
 
         // 팀에 소속된 아티스트 정보 가져오기
-        List<ArtistListResponseDto> artists = team.getArtists().stream()
+        List<ArtistListResponseDto> artists = team.getArtistTeamList().stream()
+                .map(ArtistTeam::getArtist)
                 .map(ArtistListResponseDto::of)
                 .collect(Collectors.toList());
         return TeamDetailResponseDto.of(team, isSubscribed, artists);
@@ -114,12 +117,14 @@ public class TeamService {
         boolean isSubscribed = teamSubscriptionRepository.existsByUserAndTeam(user, team);
 
         // 팀에 소속된 아티스트 정보 가져오기
-        List<ArtistListResponseDto> artists = team.getArtists().stream()
+        List<ArtistListResponseDto> artists = team.getArtistTeamList().stream()
+                .map(ArtistTeam::getArtist)
                 .map(ArtistListResponseDto::of)
                 .collect(Collectors.toList());
 
         // 관련 상품 조회
-        List<SalesListResponseDto> sales = team.getSalesList().stream()
+        List<SalesListResponseDto> sales = team.getTeamSalesList().stream()
+                .map(TeamSales::getSales)
                 .map(SalesListResponseDto::of)
                 .collect(Collectors.toList());
 
@@ -144,7 +149,8 @@ public class TeamService {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
 
-        return team.getArtists().stream()
+        return team.getArtistTeamList().stream()
+                .map(ArtistTeam::getArtist)
                 .map(ArtistListResponseDto::of)
                 .collect(Collectors.toList());
     }
@@ -154,7 +160,8 @@ public class TeamService {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
 
-        return team.getSalesList().stream()
+        return team.getTeamSalesList().stream()
+                .map(TeamSales::getSales)
                 .map(SalesListResponseDto::of)
                 .collect(Collectors.toList());
     }

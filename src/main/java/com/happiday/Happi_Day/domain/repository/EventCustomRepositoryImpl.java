@@ -182,8 +182,8 @@ public class EventCustomRepositoryImpl implements EventCustomRepository{
                 .map(Team::getId)
                 .toList();
 
-        return event.artistsEventList.any().id.in(artistIds)
-                .or(event.teamsEventList.any().id.in(teamIds));
+        return event.artistsEventList.any().artist.id.in(artistIds)
+                .or(event.teamsEventList.any().team.id.in(teamIds));
 
     }
 

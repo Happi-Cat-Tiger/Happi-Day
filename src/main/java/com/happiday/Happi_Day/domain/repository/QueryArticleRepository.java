@@ -70,12 +70,13 @@ public class QueryArticleRepository {
     }
 
     public Page<Article> findArticleByFilterAndKeywordAndSubscribedArtists(
-            Pageable pageable, String filter, String keyword, User loginUser
+            Pageable pageable,Long categoryId, String filter, String keyword, User loginUser
     ){
         List<Article> articleList = queryFactory
                 .selectFrom(article)
                 .where(subscribedArtistsCondition(loginUser)
                         .and(articleSearchFilter(filter, keyword))
+                        .and(article.category.id.eq(categoryId))
                 )
                 .orderBy(article.id.desc())
                 .offset(pageable.getOffset())
@@ -103,8 +104,8 @@ public class QueryArticleRepository {
                 .map(Team::getId)
                 .toList();
 
-        return article.artistArticleList.any().id.in(artistIds)
-                .or(article.teamArticleList.any().id.in(teamIds));
+        return article.artistArticleList.any().artist.id.in(artistIds)
+                .or(article.teamArticleList.any().team.id.in(teamIds));
 
     }
 }

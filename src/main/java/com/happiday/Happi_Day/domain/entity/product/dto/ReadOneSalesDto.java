@@ -2,14 +2,15 @@ package com.happiday.Happi_Day.domain.entity.product.dto;
 
 import com.happiday.Happi_Day.domain.entity.article.Hashtag;
 import com.happiday.Happi_Day.domain.entity.artist.Artist;
+import com.happiday.Happi_Day.domain.entity.artist.ArtistSales;
 import com.happiday.Happi_Day.domain.entity.product.Sales;
 import com.happiday.Happi_Day.domain.entity.product.SalesHashtag;
 import com.happiday.Happi_Day.domain.entity.team.Team;
+import com.happiday.Happi_Day.domain.entity.team.TeamSales;
 import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,7 +25,9 @@ public class ReadOneSalesDto {
     private String description;
     private String salesStatus;
     private List<ReadProductDto> products;
-    private List<String> hashtag;
+    private List<String> artists;
+    private List<String> teams;
+    private List<String> hashtags;
     private int likeNum;
     private List<String> imageList;
     private List<ReadDeliveryDto> deliveries;
@@ -33,10 +36,6 @@ public class ReadOneSalesDto {
     private int viewCount;
 
     public static ReadOneSalesDto fromEntity(Sales sales, List<ReadProductDto> productList){
-        List<String> keywords = new ArrayList<>();
-        keywords.addAll(sales.getArtists().stream().map(Artist::getName).collect(Collectors.toList()));
-        keywords.addAll(sales.getTeams().stream().map(Team::getName).collect(Collectors.toList()));
-        keywords.addAll(sales.getSalesHashtags().stream().map(SalesHashtag::getHashtag).map(Hashtag::getTag).collect(Collectors.toList()));
 
         List<ReadDeliveryDto> deliveries = sales.getDeliveries() != null ? sales.getDeliveries().stream().map(ReadDeliveryDto::fromEntity).collect(Collectors.toList()) : Collections.emptyList();
 
@@ -50,7 +49,9 @@ public class ReadOneSalesDto {
                 .products(productList)
                 .likeNum(sales.getSalesLikes().size())
                 .imageList(sales.getImageUrl())
-                .hashtag(keywords)
+                .artists(sales.getArtistSalesList().stream().map(ArtistSales::getArtist).map(Artist::getName).collect(Collectors.toList()))
+                .teams(sales.getTeamSalesList().stream().map(TeamSales::getTeam).map(Team::getName).collect(Collectors.toList()))
+                .hashtags(sales.getSalesHashtags().stream().map(SalesHashtag::getHashtag).map(Hashtag::getTag).collect(Collectors.toList()))
                 .deliveries(deliveries)
                 .startTime(sales.getStartTime())
                 .endTime(sales.getEndTime())

@@ -9,7 +9,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Table(name = "salesHashtag")
+@Table(name = "sales_hashtag")
 public class SalesHashtag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

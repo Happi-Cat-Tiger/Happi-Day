@@ -60,7 +60,7 @@ public class DeliveryService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Sales sales = salesRepository.findById(salesId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SALES_NOT_FOUND));
-        Delivery delivery = deliveryRepository.findById(salesId)
+        Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() -> new CustomException(ErrorCode.DELIVERY_NOT_FOUND));
         // user 확인
         if(!user.equals(sales.getUsers())) throw new CustomException(ErrorCode.FORBIDDEN);
