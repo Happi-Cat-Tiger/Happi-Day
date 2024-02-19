@@ -10,6 +10,10 @@ import com.happiday.Happi_Day.domain.entity.team.dto.TeamUpdateDto;
 import com.happiday.Happi_Day.domain.service.TeamService;
 import com.happiday.Happi_Day.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -61,9 +65,10 @@ public class TeamController {
 
     // 팀 목록 조회
     @GetMapping
-    public ResponseEntity<List<TeamListResponseDto>> getTeams() {
-        List<TeamListResponseDto> responseDtos = teamService.getTeams();
-        return new ResponseEntity<>(responseDtos, HttpStatus.OK);
+    public ResponseEntity<Slice<TeamListResponseDto>> getTeams(
+            @PageableDefault(size = 24, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
+        Slice<TeamListResponseDto> slice = teamService.getTeams(pageable);
+        return new ResponseEntity<>(slice, HttpStatus.OK);
     }
 
     // 팀 소속 아티스트 목록 조회
