@@ -10,6 +10,10 @@ import com.happiday.Happi_Day.domain.entity.product.dto.SalesListResponseDto;
 import com.happiday.Happi_Day.domain.service.ArtistService;
 import com.happiday.Happi_Day.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -61,9 +65,10 @@ public class ArtistController {
 
     // 아티스트 목록 조회
     @GetMapping
-    public ResponseEntity<List<ArtistListResponseDto>> getArtists() {
-        List<ArtistListResponseDto> responseDtos = artistService.getArtists();
-        return new ResponseEntity<>(responseDtos, HttpStatus.OK);
+    public ResponseEntity<Slice<ArtistListResponseDto>> getArtists(
+            @PageableDefault(size = 24, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
+        Slice<ArtistListResponseDto> slice = artistService.getArtists(pageable);
+        return new ResponseEntity<>(slice, HttpStatus.OK);
     }
 
     // 아티스트가 속한 팀 목록 조회
