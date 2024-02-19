@@ -13,6 +13,7 @@ import com.happiday.Happi_Day.domain.entity.team.dto.TeamRegisterDto;
 import com.happiday.Happi_Day.domain.entity.team.dto.TeamDetailResponseDto;
 import com.happiday.Happi_Day.domain.entity.team.dto.TeamUpdateDto;
 import com.happiday.Happi_Day.domain.entity.user.User;
+import com.happiday.Happi_Day.domain.repository.TeamCustomRepository;
 import com.happiday.Happi_Day.domain.repository.TeamRepository;
 import com.happiday.Happi_Day.domain.repository.TeamSubscriptionRepository;
 import com.happiday.Happi_Day.domain.repository.UserRepository;
@@ -22,6 +23,8 @@ import com.happiday.Happi_Day.utils.DefaultImageUtils;
 import com.happiday.Happi_Day.utils.FileUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,6 +40,7 @@ import java.util.stream.Collectors;
 public class TeamService {
 
     private final TeamRepository teamRepository;
+    private final TeamCustomRepository teamCustomRepository;
     private final TeamSubscriptionRepository teamSubscriptionRepository;
     private final FileUtils fileUtils;
     private final UserRepository userRepository;
@@ -138,10 +142,9 @@ public class TeamService {
     }
 
     // 팀 목록 조회
-    public List<TeamListResponseDto> getTeams() {
-        return teamRepository.findAll().stream()
-                .map(TeamListResponseDto::of)
-                .collect(Collectors.toList());
+    public Slice<TeamListResponseDto> getTeams(Pageable pageable) {
+        return teamCustomRepository.findTeamsSlice(pageable)
+                .map(TeamListResponseDto::of);
     }
 
     // 팀 소속 아티스트 목록 조회
