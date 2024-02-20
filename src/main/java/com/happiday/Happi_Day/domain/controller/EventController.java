@@ -29,7 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class EventController {
     private final EventService eventService;
 
-    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping
     public ResponseEntity<EventResponseDto> createEvent(
             @Valid @RequestPart(value = "event") EventCreateDto eventCreateDto,
             @RequestPart(value = "thumbnailFile", required = false) MultipartFile thumbnailFile,
@@ -106,7 +106,7 @@ public class EventController {
         return new ResponseEntity<>(responseDtoList, HttpStatus.OK);
     }
 
-    @PutMapping(value = "{eventId}",consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @PutMapping("/{eventId}")
     public ResponseEntity<EventResponseDto> updateEvent(
             @PathVariable Long eventId,
             @RequestPart(value = "event") EventUpdateDto eventUpdateDto,

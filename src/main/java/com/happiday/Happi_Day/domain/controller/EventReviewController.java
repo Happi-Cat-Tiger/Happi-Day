@@ -29,7 +29,7 @@ import java.util.List;
 public class EventReviewController {
     private final EventReviewService reviewService;
 
-    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping
     public ResponseEntity<EventReviewResponseDto> createReview(
             @PathVariable("eventId") Long eventId,
             @Valid @RequestPart(value = "review") EventReviewCreateDto reviewCreateDto,
