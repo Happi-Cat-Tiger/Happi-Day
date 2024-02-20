@@ -3,9 +3,7 @@ package com.happiday.Happi_Day.domain.service;
 import com.happiday.Happi_Day.domain.entity.artist.Artist;
 import com.happiday.Happi_Day.domain.entity.artist.ArtistSubscription;
 import com.happiday.Happi_Day.domain.entity.artist.dto.ArtistListResponseDto;
-import com.happiday.Happi_Day.domain.entity.subscription.dto.CombinedSubscriptionsDto;
-import com.happiday.Happi_Day.domain.entity.subscription.dto.SubscriptionRequestDto;
-import com.happiday.Happi_Day.domain.entity.subscription.dto.SubscriptionsResponseDto;
+import com.happiday.Happi_Day.domain.entity.subscription.dto.*;
 import com.happiday.Happi_Day.domain.entity.team.Team;
 import com.happiday.Happi_Day.domain.entity.team.TeamSubscription;
 import com.happiday.Happi_Day.domain.entity.team.dto.TeamListResponseDto;
@@ -62,7 +60,7 @@ public class SubscriptionService {
 
     // 현재 구독 중인 팀/아티스트 목록 조회
     @Transactional(readOnly = true)
-    public SubscriptionsResponseDto getCurrentSubscriptions(String username) {
+    public SubscriptionsResponseDto getSubscriptions(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
@@ -77,6 +75,34 @@ public class SubscriptionService {
                 .collect(Collectors.toList());
 
         return new SubscriptionsResponseDto(subscribedArtists, subscribedTeams);
+    }
+
+    // 현재 구독 중인 팀 목록 조회
+    @Transactional(readOnly = true)
+    public SubscriptionTeamsDto getSubscribedTeams(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        List<TeamListResponseDto> subscribedTeams = user.getTeamSubscriptionList().stream()
+                .map(TeamSubscription::getTeam)
+                .map(TeamListResponseDto::of)
+                .collect(Collectors.toList());
+
+        return new SubscriptionTeamsDto(subscribedTeams);
+    }
+
+    // 현재 구독 중인 아티스트 목록 조회
+    @Transactional(readOnly = true)
+    public SubscriptionArtistsDto getSubscribedArtists(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        List<ArtistListResponseDto> subscribedArtists = user.getArtistSubscriptionList().stream()
+                .map(ArtistSubscription::getArtist)
+                .map(ArtistListResponseDto::of)
+                .collect(Collectors.toList());
+
+        return new SubscriptionArtistsDto(subscribedArtists);
     }
 
     // 구독 추가
@@ -148,7 +174,7 @@ public class SubscriptionService {
     }
 
     // 구독하지 않은 아티스트 조회
-    public Page<ArtistListResponseDto> getSubscribedArtists(String username, Pageable pageable) {
+    public Page<ArtistListResponseDto> getUnSubscribedArtists(String username, Pageable pageable) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         return artistRepository.findUnsubscribedArtists(user.getId(), pageable)

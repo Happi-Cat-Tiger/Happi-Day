@@ -1,9 +1,7 @@
 package com.happiday.Happi_Day.domain.controller;
 
 import com.happiday.Happi_Day.domain.entity.artist.dto.ArtistListResponseDto;
-import com.happiday.Happi_Day.domain.entity.subscription.dto.CombinedSubscriptionsDto;
-import com.happiday.Happi_Day.domain.entity.subscription.dto.SubscriptionRequestDto;
-import com.happiday.Happi_Day.domain.entity.subscription.dto.SubscriptionsResponseDto;
+import com.happiday.Happi_Day.domain.entity.subscription.dto.*;
 import com.happiday.Happi_Day.domain.entity.team.dto.TeamListResponseDto;
 import com.happiday.Happi_Day.domain.service.SubscriptionService;
 import com.happiday.Happi_Day.utils.SecurityUtils;
@@ -30,9 +28,23 @@ public class SubscriptionController {
 
     // 현재 구독 중인 팀/아티스트 목록 조회
     @GetMapping
-    public ResponseEntity<SubscriptionsResponseDto> getCurrentSubscriptions() {
+    public ResponseEntity<SubscriptionsResponseDto> getSubscriptions() {
         String username = SecurityUtils.getCurrentUsername();
-        return ResponseEntity.ok(subscriptionService.getCurrentSubscriptions(username));
+        return ResponseEntity.ok(subscriptionService.getSubscriptions(username));
+    }
+
+    // 현재 구독 중인 아티스트 목록 조회
+    @GetMapping("/artists")
+    public ResponseEntity<SubscriptionArtistsDto> getSubscribedTeams() {
+        String username = SecurityUtils.getCurrentUsername();
+        return ResponseEntity.ok(subscriptionService.getSubscribedArtists(username));
+    }
+
+    // 현재 구독 중인 팀 목록 조회
+    @GetMapping("/teams")
+    public ResponseEntity<SubscriptionTeamsDto> getSubscribedArtists() {
+        String username = SecurityUtils.getCurrentUsername();
+        return ResponseEntity.ok(subscriptionService.getSubscribedTeams(username));
     }
 
     // 구독 추가
@@ -57,7 +69,7 @@ public class SubscriptionController {
     @GetMapping("/undiscovered/artists")
     public ResponseEntity<Page<ArtistListResponseDto>> getUnsubscribedArtists(Pageable pageable) {
         String username = SecurityUtils.getCurrentUsername();
-        return ResponseEntity.ok(subscriptionService.getSubscribedArtists(username, pageable));
+        return ResponseEntity.ok(subscriptionService.getUnSubscribedArtists(username, pageable));
     }
 
     // 구독하지 않은 팀 조회
