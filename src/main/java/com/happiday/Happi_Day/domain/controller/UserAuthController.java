@@ -1,7 +1,5 @@
 package com.happiday.Happi_Day.domain.controller;
 
-import com.happiday.Happi_Day.domain.entity.user.CustomUserDetails;
-import com.happiday.Happi_Day.domain.entity.user.RoleType;
 import com.happiday.Happi_Day.domain.entity.user.User;
 import com.happiday.Happi_Day.domain.entity.user.dto.UserFindDto;
 import com.happiday.Happi_Day.domain.entity.user.dto.UserLoginDto;
@@ -14,7 +12,6 @@ import com.happiday.Happi_Day.domain.service.UserService;
 import com.happiday.Happi_Day.exception.CustomException;
 import com.happiday.Happi_Day.exception.ErrorCode;
 import com.happiday.Happi_Day.jwt.JwtTokenDto;
-import com.happiday.Happi_Day.jwt.JwtTokenUtils;
 import com.happiday.Happi_Day.utils.DefaultImageUtils;
 import com.happiday.Happi_Day.utils.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -80,7 +77,7 @@ public class UserAuthController {
     }
 
     @PostMapping("/find")
-    public ResponseEntity<String> findPassword(@RequestBody UserFindDto dto) throws Exception {
+    public ResponseEntity<String> findPassword(@RequestBody UserFindDto dto) {
         return new ResponseEntity<>(userService.findPassword(dto), HttpStatus.OK);
     }
 

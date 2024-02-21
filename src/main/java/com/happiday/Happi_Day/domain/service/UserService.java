@@ -11,7 +11,6 @@ import com.happiday.Happi_Day.utils.DefaultImageUtils;
 import com.happiday.Happi_Day.utils.FileUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -174,7 +173,7 @@ public class UserService {
         userRepository.delete(user);
     }
 
-    public String findPassword(UserFindDto dto) throws Exception {
+    public String findPassword(UserFindDto dto) {
         // 이름 + 이메일 입력
         User user = userRepository.findByUsername(dto.getUsername())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
