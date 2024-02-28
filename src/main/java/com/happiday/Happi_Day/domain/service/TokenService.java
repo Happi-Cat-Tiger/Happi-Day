@@ -6,7 +6,6 @@ import com.happiday.Happi_Day.domain.repository.UserRepository;
 import com.happiday.Happi_Day.exception.CustomException;
 import com.happiday.Happi_Day.exception.ErrorCode;
 import com.happiday.Happi_Day.jwt.JwtTokenUtils;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -23,12 +22,6 @@ public class TokenService {
     private final UserRepository userRepository;
     private final StringRedisTemplate redisTemplate;
     private String key = "refresh";
-
-//    @PostConstruct
-//    public void init() {
-//        log.info("Token Service init");
-//        redisTemplate.expire(key, Duration.ofHours(1));
-//    }
 
     public String setToken(String username) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
