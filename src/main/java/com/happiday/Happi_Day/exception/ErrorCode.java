@@ -43,6 +43,9 @@ public enum ErrorCode {
     // team
     TEAM_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 팀을 찾을 수 없습니다."),
 
+    // subscription
+    SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "구독 정보를 찾을 수 없습니다."),
+
     // event
     EVENT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 이벤트를 찾을 수 없습니다."),
     EVENT_ALREADY_DELETED(HttpStatus.NOT_FOUND, "이미 삭제된 이벤트입니다."),

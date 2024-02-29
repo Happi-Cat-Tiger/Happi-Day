@@ -1,11 +1,7 @@
 package com.happiday.Happi_Day.domain.entity.team;
 
 import com.happiday.Happi_Day.domain.entity.BaseEntity;
-import com.happiday.Happi_Day.domain.entity.article.Article;
-import com.happiday.Happi_Day.domain.entity.artist.Artist;
-import com.happiday.Happi_Day.domain.entity.event.Event;
-import com.happiday.Happi_Day.domain.entity.product.Sales;
-import com.happiday.Happi_Day.domain.entity.user.User;
+import com.happiday.Happi_Day.domain.entity.artist.ArtistTeam;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -21,7 +17,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SuperBuilder(toBuilder = true)
-@SQLDelete(sql="UPDATE team SET deleted_at = now() WHERE id = ?")
+@SQLDelete(sql = "UPDATE team SET deleted_at = now() WHERE id = ?")
 @Where(clause = "deleted_at IS NULL")
 public class Team extends BaseEntity {
 
@@ -36,31 +32,43 @@ public class Team extends BaseEntity {
 
     private String logoUrl;
 
-    @ManyToMany(mappedBy = "teams")
-    private List<Artist> artists = new ArrayList<>();
+    @OneToMany(mappedBy = "team")
+    private List<ArtistTeam> artistTeamList = new ArrayList<>();
 
     // 이벤트
-    @ManyToMany(mappedBy = "teams")
-    private List<Event> events = new ArrayList<>();
+    @OneToMany(mappedBy = "team")
+    private List<TeamEvent> events = new ArrayList<>();
 
     // 판매글
-    @ManyToMany(mappedBy = "teams")
-    private List<Sales> salesList = new ArrayList<>();
+    @OneToMany(mappedBy = "team")
+    private List<TeamSales> teamSalesList = new ArrayList<>();
 
     // 유저 구독
-    @ManyToMany(mappedBy = "subscribedTeams")
-    private List<User> subscribers = new ArrayList<>();
+    @OneToMany(mappedBy = "team")
+    private List<TeamSubscription> subscribers = new ArrayList<>();
 
     // 게시판
-    @ManyToMany(mappedBy = "teams")
-    private List<Article> articles = new ArrayList<>();
+    @OneToMany(mappedBy = "team")
+    private List<TeamArticle> teamArticleList = new ArrayList<>();
 
     public void update(Team teamUpdate) {
-        this.name  = teamUpdate.getName();
+        this.name = teamUpdate.getName();
         this.description = teamUpdate.getDescription();
     }
 
     public void setLogoUrl(String logoUrl) {
         this.logoUrl = logoUrl;
+    }
+
+    public void setArtists(List<ArtistTeam> artistTeamList) {
+        if (this.artistTeamList == null) {
+            this.artistTeamList = new ArrayList<>();
+        } else {
+            this.artistTeamList.clear();
+        }
+
+        if (artistTeamList != null) {
+            this.artistTeamList.addAll(artistTeamList);
+        }
     }
 }

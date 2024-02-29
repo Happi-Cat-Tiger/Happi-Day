@@ -2,7 +2,9 @@ package com.happiday.Happi_Day.domain.repository;
 
 import com.happiday.Happi_Day.domain.entity.article.Article;
 import com.happiday.Happi_Day.domain.entity.artist.Artist;
+import com.happiday.Happi_Day.domain.entity.artist.ArtistSubscription;
 import com.happiday.Happi_Day.domain.entity.team.Team;
+import com.happiday.Happi_Day.domain.entity.team.TeamSubscription;
 import com.happiday.Happi_Day.domain.entity.user.User;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -68,12 +70,13 @@ public class QueryArticleRepository {
     }
 
     public Page<Article> findArticleByFilterAndKeywordAndSubscribedArtists(
-            Pageable pageable, String filter, String keyword, User loginUser
+            Pageable pageable,Long categoryId, String filter, String keyword, User loginUser
     ){
         List<Article> articleList = queryFactory
                 .selectFrom(article)
                 .where(subscribedArtistsCondition(loginUser)
                         .and(articleSearchFilter(filter, keyword))
+                        .and(article.category.id.eq(categoryId))
                 )
                 .orderBy(article.id.desc())
                 .offset(pageable.getOffset())
@@ -91,16 +94,18 @@ public class QueryArticleRepository {
     }
 
     private BooleanExpression subscribedArtistsCondition(User loginUser) {
-        List<Long> artistIds = loginUser.getSubscribedArtists().stream()
+        List<Long> artistIds = loginUser.getArtistSubscriptionList().stream()
+                .map(ArtistSubscription::getArtist)
                 .map(Artist::getId)
                 .toList();
 
-        List<Long> teamIds = loginUser.getSubscribedTeams().stream()
+        List<Long> teamIds = loginUser.getTeamSubscriptionList().stream()
+                .map(TeamSubscription::getTeam)
                 .map(Team::getId)
                 .toList();
 
-        return article.artists.any().id.in(artistIds)
-                .or(article.teams.any().id.in(teamIds));
+        return article.artistArticleList.any().artist.id.in(artistIds)
+                .or(article.teamArticleList.any().team.id.in(teamIds));
 
     }
 }

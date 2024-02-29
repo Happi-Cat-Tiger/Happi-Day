@@ -9,7 +9,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Table(name = "articleLike")
+@Table(name = "article_like")
 public class ArticleLike {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

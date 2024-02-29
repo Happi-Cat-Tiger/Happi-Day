@@ -16,7 +16,7 @@ public class ArtistRegisterDto {
         return Artist.builder()
                 .name(name)
                 .description(description)
-                .teams(new ArrayList<>())
+                .artistTeamList(new ArrayList<>())
                 .build();
     }
 }

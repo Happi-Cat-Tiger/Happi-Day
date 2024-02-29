@@ -8,7 +8,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Table(name = "articleHashtag")
+@Table(name = "article_hashtag")
 public class ArticleHashtag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

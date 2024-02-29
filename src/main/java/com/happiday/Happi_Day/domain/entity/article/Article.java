@@ -1,9 +1,9 @@
 package com.happiday.Happi_Day.domain.entity.article;
 
 import com.happiday.Happi_Day.domain.entity.BaseEntity;
-import com.happiday.Happi_Day.domain.entity.artist.Artist;
+import com.happiday.Happi_Day.domain.entity.artist.ArtistArticle;
 import com.happiday.Happi_Day.domain.entity.board.BoardCategory;
-import com.happiday.Happi_Day.domain.entity.team.Team;
+import com.happiday.Happi_Day.domain.entity.team.TeamArticle;
 import com.happiday.Happi_Day.domain.entity.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -71,24 +71,15 @@ public class Article extends BaseEntity {
     private List<ArticleLike> articleLikes = new ArrayList<>();
 
     // 게시글 아티스트 매핑
-    @ManyToMany
-    @JoinTable(
-            name = "article_artist",
-            joinColumns = @JoinColumn(name = "article_id"),
-            inverseJoinColumns = @JoinColumn(name = "artist_id")
-    )
-    private List<Artist> artists = new ArrayList<>();
+    @OneToMany(mappedBy = "article")
+    private List<ArtistArticle> artistArticleList = new ArrayList<>();
 
     // 게시글 팀 매핑
-    @ManyToMany
-    @JoinTable(
-            name = "article_team",
-            joinColumns = @JoinColumn(name = "article_id"),
-            inverseJoinColumns = @JoinColumn(name = "artist_id")
-    )
-    private List<Team> teams = new ArrayList<>();
+    @OneToMany(mappedBy = "article")
+    private List<TeamArticle> teamArticleList = new ArrayList<>();
 
     // 해시태그 매핑
+    @Setter
     @OneToMany(mappedBy = "article")
     private List<ArticleHashtag> articleHashtags = new ArrayList<>();
 
@@ -96,8 +87,8 @@ public class Article extends BaseEntity {
         if (updateArticle.getTitle() != null) this.title = updateArticle.getTitle();
         if (updateArticle.getContent() != null) this.content = updateArticle.getContent();
         if (updateArticle.getEventAddress() != null) this.eventAddress = updateArticle.getEventAddress();
-        if (updateArticle.getArtists() != null) this.artists = updateArticle.getArtists();
-        if (updateArticle.getTeams() != null) this.teams = updateArticle.getTeams();
+        if (updateArticle.getArtistArticleList() != null) this.artistArticleList = updateArticle.getArtistArticleList();
+        if (updateArticle.getTeamArticleList() != null) this.teamArticleList = updateArticle.getTeamArticleList();
         if (updateArticle.getEctArtists() != null) this.ectArtists = updateArticle.getEctArtists();
         if (updateArticle.getEctTeams() != null) this.ectTeams = updateArticle.getEctTeams();
     }
@@ -106,8 +97,8 @@ public class Article extends BaseEntity {
         this.thumbnailUrl = thumbnailImage;
     }
 
-    public void setArtists(List<Artist> artists, List<Team> teams) {
-        if (artists != null) this.artists = artists;
-        if (teams != null) this.teams = teams;
+    public void setArtists(List<ArtistArticle> artistArticleList, List<TeamArticle> teamArticleList) {
+        if (artistArticleList != null) this.artistArticleList = artistArticleList;
+        if (teamArticleList != null) this .teamArticleList = teamArticleList;
     }
 }

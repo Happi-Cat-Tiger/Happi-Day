@@ -1,6 +1,10 @@
 package com.happiday.Happi_Day.domain.service;
 
 import com.happiday.Happi_Day.domain.entity.artist.Artist;
+import com.happiday.Happi_Day.domain.entity.artist.ArtistEvent;
+import com.happiday.Happi_Day.domain.entity.artist.ArtistSales;
+import com.happiday.Happi_Day.domain.entity.artist.ArtistSubscription;
+import com.happiday.Happi_Day.domain.entity.artist.ArtistTeam;
 import com.happiday.Happi_Day.domain.entity.artist.dto.ArtistListResponseDto;
 import com.happiday.Happi_Day.domain.entity.artist.dto.ArtistRegisterDto;
 import com.happiday.Happi_Day.domain.entity.artist.dto.ArtistDetailResponseDto;
@@ -10,19 +14,20 @@ import com.happiday.Happi_Day.domain.entity.team.Team;
 import com.happiday.Happi_Day.domain.entity.team.dto.TeamListResponseDto;
 import com.happiday.Happi_Day.domain.entity.product.dto.SalesListResponseDto;
 import com.happiday.Happi_Day.domain.entity.user.User;
-import com.happiday.Happi_Day.domain.repository.ArtistRepository;
-import com.happiday.Happi_Day.domain.repository.TeamRepository;
-import com.happiday.Happi_Day.domain.repository.UserRepository;
+import com.happiday.Happi_Day.domain.repository.*;
 import com.happiday.Happi_Day.exception.CustomException;
 import com.happiday.Happi_Day.exception.ErrorCode;
 import com.happiday.Happi_Day.utils.DefaultImageUtils;
 import com.happiday.Happi_Day.utils.FileUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,7 +40,10 @@ public class ArtistService {
 
     private final ArtistRepository artistRepository;
     private final TeamRepository teamRepository;
+    private final ArtistTeamRepository artistTeamRepository;
+    private final ArtistCustomRepository artistCustomRepository;
     private final UserRepository userRepository;
+    private final ArtistSubscriptionRepository subscriptionRepository;
     private final FileUtils fileUtils;
     private final DefaultImageUtils defaultImageUtils;
 
@@ -55,10 +63,20 @@ public class ArtistService {
         // 팀과의 연관 관계 처리
         if (requestDto.getTeamIds() != null && !requestDto.getTeamIds().isEmpty()) {
             List<Team> teams = teamRepository.findAllById(requestDto.getTeamIds());
+            List<ArtistTeam> artistTeamList = new ArrayList<>();
 
-            artistEntity.setTeams(teams); // 아티스트와 팀 연결
+            for (Team team : teams) {
+                ArtistTeam artistTeam = ArtistTeam.builder()
+                        .artist(artistEntity)
+                        .team(team)
+                        .build();
+                artistTeamList.add(artistTeam);
+            }
+            artistTeamRepository.saveAll(artistTeamList);
+            artistEntity.setTeams(artistTeamList); // 아티스트와 팀 연결
+
             artistEntity = artistRepository.save(artistEntity);
-            return ArtistDetailResponseDto.of(artistEntity, false, teamsToDto(artistEntity.getTeams()));
+            return ArtistDetailResponseDto.of(artistEntity, false, teamsToDto(artistEntity.getArtistTeamList()));
         }
 
         artistEntity = artistRepository.save(artistEntity);
@@ -95,9 +113,22 @@ public class ArtistService {
         // 팀과의 연관 관계 처리
         if (requestDto.getTeamIds() != null) {
             List<Team> teams = teamRepository.findAllById(requestDto.getTeamIds());
-            artist.setTeams(teams);
+            artistTeamRepository.deleteByArtist(artist);
 
-            List<TeamListResponseDto> teamDtos = artist.getTeams().stream()
+            List<ArtistTeam> artistTeamList = new ArrayList<>();
+
+            for (Team team : teams) {
+                ArtistTeam artistTeam = ArtistTeam.builder()
+                        .artist(artist)
+                        .team(team)
+                        .build();
+                artistTeamList.add(artistTeam);
+            }
+            artistTeamRepository.saveAll(artistTeamList);
+            artist.setTeams(artistTeamList); // 아티스트와 팀 연결
+
+            List<TeamListResponseDto> teamDtos = artist.getArtistTeamList().stream()
+                    .map(ArtistTeam::getTeam)
                     .map(TeamListResponseDto::of)
                     .collect(Collectors.toList());
             artistRepository.save(artist);
@@ -124,20 +155,23 @@ public class ArtistService {
                 .orElseThrow(() -> new CustomException(ErrorCode.ARTIST_NOT_FOUND));
 
         // 구독 여부 확인
-        boolean isSubscribed = user.getSubscribedArtists().contains(artist);
+        boolean isSubscribed = subscriptionRepository.existsByUserAndArtist(user, artist);
 
         // 아티스트가 속한 팀 정보 가져오기
-        List<TeamListResponseDto> teams = artist.getTeams().stream()
+        List<TeamListResponseDto> teams = artist.getArtistTeamList().stream()
+                .map(ArtistTeam::getTeam)
                 .map(TeamListResponseDto::of)
                 .collect(Collectors.toList());
 
         // 관련 상품 조회
-        List<SalesListResponseDto> sales = artist.getSalesList().stream()
+        List<SalesListResponseDto> sales = artist.getArtistSalesList().stream()
+                .map(ArtistSales::getSales)
                 .map(SalesListResponseDto::of)
                 .collect(Collectors.toList());
 
         // 관련 이벤트 조회
         List<EventListResponseDto> events = artist.getEvents().stream()
+                .map(ArtistEvent::getEvent)
                 .map(EventListResponseDto::fromEntity)
                 .collect(Collectors.toList());
 
@@ -145,10 +179,9 @@ public class ArtistService {
     }
 
     // 아티스트 목록 조회
-    public List<ArtistListResponseDto> getArtists() {
-        return artistRepository.findAll().stream()
-                .map(ArtistListResponseDto::of)
-                .collect(Collectors.toList());
+    public Slice<ArtistListResponseDto> getArtists(Pageable pageable) {
+        return artistCustomRepository.findArtistsSlice(pageable)
+                .map(ArtistListResponseDto::of);
     }
 
     // 아티스트가 속한 팀 목록 조회
@@ -156,7 +189,8 @@ public class ArtistService {
         Artist artist = artistRepository.findById(artistId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ARTIST_NOT_FOUND));
 
-        return artist.getTeams().stream()
+        return artist.getArtistTeamList().stream()
+                .map(ArtistTeam::getTeam)
                 .map(TeamListResponseDto::of)
                 .collect(Collectors.toList());
     }
@@ -166,7 +200,8 @@ public class ArtistService {
         Artist artist = artistRepository.findById(artistId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ARTIST_NOT_FOUND));
 
-        return artist.getSalesList().stream()
+        return artist.getArtistSalesList().stream()
+                .map(ArtistSales::getSales)
                 .map(SalesListResponseDto::of)
                 .collect(Collectors.toList());
     }
@@ -177,6 +212,7 @@ public class ArtistService {
                 .orElseThrow(() -> new CustomException(ErrorCode.ARTIST_NOT_FOUND));
 
         return artist.getEvents().stream()
+                .map(ArtistEvent::getEvent)
                 .map(EventListResponseDto::fromEntity)
                 .collect(Collectors.toList());
     }
@@ -188,9 +224,16 @@ public class ArtistService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Artist artist = artistRepository.findById(artistId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ARTIST_NOT_FOUND));
-        if (!user.getSubscribedArtists().contains(artist)) {
-            user.getSubscribedArtists().add(artist);
-            userRepository.save(user);
+
+        boolean isAlreadySubscribed = subscriptionRepository.existsByUserAndArtist(user, artist);
+
+        if (!isAlreadySubscribed) {
+            ArtistSubscription subscription = ArtistSubscription.builder()
+                    .user(user)
+                    .artist(artist)
+                    .subscribedAt(LocalDateTime.now())
+                    .build();
+            subscriptionRepository.save(subscription);
         }
     }
 
@@ -201,13 +244,17 @@ public class ArtistService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Artist artist = artistRepository.findById(artistId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ARTIST_NOT_FOUND));
-        user.getSubscribedArtists().remove(artist);
-        userRepository.save(user);
+
+        ArtistSubscription artistSubscription = subscriptionRepository.findByUserAndArtist(user, artist)
+                .orElseThrow(() -> new CustomException(ErrorCode.SUBSCRIPTION_NOT_FOUND));
+
+        subscriptionRepository.delete(artistSubscription);
     }
 
-    // 팀을 DTO로 변환하는 유틸리티 메서드
-    private List<TeamListResponseDto> teamsToDto(List<Team> teams) {
-        return teams.stream()
+    // 아티스트-팀 연관 관계를 DTO로 변환하는 유틸리티 메서드
+    private List<TeamListResponseDto> teamsToDto(List<ArtistTeam> artistTeamList) {
+        return artistTeamList.stream()
+                .map(ArtistTeam::getTeam)
                 .map(TeamListResponseDto::of)
                 .collect(Collectors.toList());
     }

@@ -1,8 +1,8 @@
 package com.happiday.Happi_Day.domain.entity.event;
 
 import com.happiday.Happi_Day.domain.entity.BaseEntity;
-import com.happiday.Happi_Day.domain.entity.artist.Artist;
-import com.happiday.Happi_Day.domain.entity.team.Team;
+import com.happiday.Happi_Day.domain.entity.artist.ArtistEvent;
+import com.happiday.Happi_Day.domain.entity.team.TeamEvent;
 import com.happiday.Happi_Day.domain.entity.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -78,22 +78,12 @@ public class Event extends BaseEntity {
     private List<EventParticipation> eventParticipationList;
 
     // 이벤트 팀 매핑
-    @ManyToMany
-    @JoinTable(
-            name = "event_team",
-            joinColumns = @JoinColumn(name = "event_id"),
-            inverseJoinColumns = @JoinColumn(name = "team_id")
-    )
-    private List<Team> teams = new ArrayList<>();
+    @OneToMany(mappedBy = "event")
+    private List<TeamEvent> teamsEventList = new ArrayList<>();
 
     // 이벤트 아티스트 매핑
-    @ManyToMany
-    @JoinTable(
-            name = "event_artist",
-            joinColumns = @JoinColumn(name = "event_id"),
-            inverseJoinColumns = @JoinColumn(name = "artist_id")
-    )
-    private List<Artist> artists = new ArrayList<>();
+    @OneToMany(mappedBy = "event")
+    private List<ArtistEvent> artistsEventList = new ArrayList<>();
 
     // 이벤트 해시태그 매핑
     @Setter
@@ -122,13 +112,13 @@ public class Event extends BaseEntity {
         if (updateEvent.getLocation() != null) {
             this.location = updateEvent.getLocation();
         }
-        if (updateEvent.getTeams() != null && !updateEvent.getTeams().isEmpty()) {
-            this.teams.clear();
-            this.teams = updateEvent.getTeams();
+        if (updateEvent.getTeamsEventList() != null && !updateEvent.getTeamsEventList().isEmpty()) {
+            this.teamsEventList.clear();
+            this.teamsEventList = updateEvent.getTeamsEventList();
         }
-        if (updateEvent.getArtists() != null && !updateEvent.getArtists().isEmpty()) {
-            this.artists.clear();
-            this.artists = updateEvent.getArtists();
+        if (updateEvent.getArtistsEventList() != null && !updateEvent.getArtistsEventList().isEmpty()) {
+            this.artistsEventList.clear();
+            this.artistsEventList = updateEvent.getArtistsEventList();
         }
     }
 

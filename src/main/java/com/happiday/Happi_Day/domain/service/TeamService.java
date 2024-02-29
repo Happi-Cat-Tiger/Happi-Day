@@ -1,22 +1,28 @@
 package com.happiday.Happi_Day.domain.service;
 
+import com.happiday.Happi_Day.domain.entity.artist.Artist;
+import com.happiday.Happi_Day.domain.entity.artist.ArtistTeam;
 import com.happiday.Happi_Day.domain.entity.artist.dto.ArtistListResponseDto;
 import com.happiday.Happi_Day.domain.entity.event.dto.EventListResponseDto;
 import com.happiday.Happi_Day.domain.entity.product.dto.SalesListResponseDto;
 import com.happiday.Happi_Day.domain.entity.team.Team;
+import com.happiday.Happi_Day.domain.entity.team.TeamEvent;
+import com.happiday.Happi_Day.domain.entity.team.TeamSales;
+import com.happiday.Happi_Day.domain.entity.team.TeamSubscription;
 import com.happiday.Happi_Day.domain.entity.team.dto.TeamListResponseDto;
 import com.happiday.Happi_Day.domain.entity.team.dto.TeamRegisterDto;
 import com.happiday.Happi_Day.domain.entity.team.dto.TeamDetailResponseDto;
 import com.happiday.Happi_Day.domain.entity.team.dto.TeamUpdateDto;
 import com.happiday.Happi_Day.domain.entity.user.User;
-import com.happiday.Happi_Day.domain.repository.TeamRepository;
-import com.happiday.Happi_Day.domain.repository.UserRepository;
+import com.happiday.Happi_Day.domain.repository.*;
 import com.happiday.Happi_Day.exception.CustomException;
 import com.happiday.Happi_Day.exception.ErrorCode;
 import com.happiday.Happi_Day.utils.DefaultImageUtils;
 import com.happiday.Happi_Day.utils.FileUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,6 +38,10 @@ import java.util.stream.Collectors;
 public class TeamService {
 
     private final TeamRepository teamRepository;
+    private final TeamCustomRepository teamCustomRepository;
+    private final TeamSubscriptionRepository teamSubscriptionRepository;
+    private final ArtistRepository artistRepository;
+    private final ArtistTeamRepository artistTeamRepository;
     private final FileUtils fileUtils;
     private final UserRepository userRepository;
     private final DefaultImageUtils defaultImageUtils;
@@ -47,6 +57,25 @@ public class TeamService {
             teamEntity.setLogoUrl(saveFileUrl);
         } else {
             teamEntity.setLogoUrl(defaultImageUtils.getDefaultImageUrlTeamArtistProfile());
+        }
+
+        // 아티스트와의 연관 관계 처리
+        if (requestDto.getArtistIds() != null && !requestDto.getArtistIds().isEmpty()) {
+            List<Artist> artists = artistRepository.findAllById(requestDto.getArtistIds());
+            List<ArtistTeam> artistTeamList = new ArrayList<>();
+
+            for (Artist artist : artists) {
+                ArtistTeam artistTeam = ArtistTeam.builder()
+                        .artist(artist)
+                        .team(teamEntity)
+                        .build();
+                artistTeamList.add(artistTeam);
+            }
+            artistTeamRepository.saveAll(artistTeamList);
+            teamEntity.setArtists(artistTeamList);
+            
+            teamEntity = teamRepository.save(teamEntity);
+            return TeamDetailResponseDto.of(teamEntity, false, artistToDto(teamEntity.getArtistTeamList()));
         }
 
         teamEntity = teamRepository.save(teamEntity);
@@ -83,9 +112,12 @@ public class TeamService {
         team.update(requestDto.toEntity());
         teamRepository.save(team);
 
-        boolean isSubscribed = user.getSubscribedTeams().contains(team);
+        // 구독 여부 확인
+        boolean isSubscribed = teamSubscriptionRepository.existsByUserAndTeam(user, team);
+
         // 팀에 소속된 아티스트 정보 가져오기
-        List<ArtistListResponseDto> artists = team.getArtists().stream()
+        List<ArtistListResponseDto> artists = team.getArtistTeamList().stream()
+                .map(ArtistTeam::getArtist)
                 .map(ArtistListResponseDto::of)
                 .collect(Collectors.toList());
         return TeamDetailResponseDto.of(team, isSubscribed, artists);
@@ -105,20 +137,23 @@ public class TeamService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
-        boolean isSubscribed = user.getSubscribedTeams().contains(team);
+        boolean isSubscribed = teamSubscriptionRepository.existsByUserAndTeam(user, team);
 
         // 팀에 소속된 아티스트 정보 가져오기
-        List<ArtistListResponseDto> artists = team.getArtists().stream()
+        List<ArtistListResponseDto> artists = team.getArtistTeamList().stream()
+                .map(ArtistTeam::getArtist)
                 .map(ArtistListResponseDto::of)
                 .collect(Collectors.toList());
 
         // 관련 상품 조회
-        List<SalesListResponseDto> sales = team.getSalesList().stream()
+        List<SalesListResponseDto> sales = team.getTeamSalesList().stream()
+                .map(TeamSales::getSales)
                 .map(SalesListResponseDto::of)
                 .collect(Collectors.toList());
 
         // 관련 이벤트 조회
         List<EventListResponseDto> events = team.getEvents().stream()
+                .map(TeamEvent::getEvent)
                 .map(EventListResponseDto::fromEntity)
                 .collect(Collectors.toList());
 
@@ -126,10 +161,9 @@ public class TeamService {
     }
 
     // 팀 목록 조회
-    public List<TeamListResponseDto> getTeams() {
-        return teamRepository.findAll().stream()
-                .map(TeamListResponseDto::of)
-                .collect(Collectors.toList());
+    public Slice<TeamListResponseDto> getTeams(Pageable pageable) {
+        return teamCustomRepository.findTeamsSlice(pageable)
+                .map(TeamListResponseDto::of);
     }
 
     // 팀 소속 아티스트 목록 조회
@@ -137,7 +171,8 @@ public class TeamService {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
 
-        return team.getArtists().stream()
+        return team.getArtistTeamList().stream()
+                .map(ArtistTeam::getArtist)
                 .map(ArtistListResponseDto::of)
                 .collect(Collectors.toList());
     }
@@ -147,7 +182,8 @@ public class TeamService {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
 
-        return team.getSalesList().stream()
+        return team.getTeamSalesList().stream()
+                .map(TeamSales::getSales)
                 .map(SalesListResponseDto::of)
                 .collect(Collectors.toList());
     }
@@ -158,6 +194,7 @@ public class TeamService {
                 .orElseThrow(() -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
 
         return team.getEvents().stream()
+                .map(TeamEvent::getEvent)
                 .map(EventListResponseDto::fromEntity)
                 .collect(Collectors.toList());
     }
@@ -169,9 +206,15 @@ public class TeamService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
-        if (!user.getSubscribedTeams().contains(team)) {
-            user.getSubscribedTeams().add(team);
-            userRepository.save(user);
+
+        boolean isSubscribed = teamSubscriptionRepository.existsByUserAndTeam(user, team);
+
+        if (!isSubscribed) {
+            TeamSubscription subscription = TeamSubscription.builder()
+                    .user(user)
+                    .team(team)
+                    .build();
+            teamSubscriptionRepository.save(subscription);
         }
     }
 
@@ -182,7 +225,18 @@ public class TeamService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new CustomException(ErrorCode.TEAM_NOT_FOUND));
-        user.getSubscribedTeams().remove(team);
-        userRepository.save(user);
+
+        TeamSubscription teamSubscription = teamSubscriptionRepository.findByUserAndTeam(user, team)
+                .orElseThrow(() -> new CustomException(ErrorCode.SUBSCRIPTION_NOT_FOUND));
+
+        teamSubscriptionRepository.delete(teamSubscription);
+    }
+
+    // 아티스트-팀 연관 관계를 DTO로 변환하는 유틸리티 메서드
+    private List<ArtistListResponseDto> artistToDto(List<ArtistTeam> artistTeamList) {
+        return artistTeamList.stream()
+                .map(ArtistTeam::getArtist)
+                .map(ArtistListResponseDto::of)
+                .collect(Collectors.toList());
     }
 }

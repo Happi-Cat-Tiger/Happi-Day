@@ -15,8 +15,8 @@ import org.hibernate.annotations.Where;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @SuperBuilder(toBuilder = true)
-@Table(name = "orderedProduct")
-@SQLDelete(sql = "UPDATE orderedProduct SET deleted_at = now() WHERE id = ?")
+@Table(name = "ordered_product")
+@SQLDelete(sql = "UPDATE ordered_product SET deleted_at = now() WHERE id = ?")
 @Where(clause = "deleted_at IS NULL")
 public class OrderedProduct extends BaseEntity {
     @Id

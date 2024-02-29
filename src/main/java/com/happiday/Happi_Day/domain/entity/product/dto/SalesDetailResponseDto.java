@@ -1,11 +1,13 @@
 package com.happiday.Happi_Day.domain.entity.product.dto;
 
 import com.happiday.Happi_Day.domain.entity.artist.Artist;
+import com.happiday.Happi_Day.domain.entity.artist.ArtistSales;
 import com.happiday.Happi_Day.domain.entity.product.Product;
 import com.happiday.Happi_Day.domain.entity.product.Sales;
 import com.happiday.Happi_Day.domain.entity.product.SalesCategory;
 import com.happiday.Happi_Day.domain.entity.product.SalesStatus;
 import com.happiday.Happi_Day.domain.entity.team.Team;
+import com.happiday.Happi_Day.domain.entity.team.TeamSales;
 import com.happiday.Happi_Day.domain.entity.user.User;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,8 +38,8 @@ public class SalesDetailResponseDto {
                 .imageUrl(sales.getImageUrl())
                 .salesStatus(sales.getSalesStatus())
                 .products(sales.getProducts())
-                .artists(sales.getArtists())
-                .teams(sales.getTeams())
+                .artists(sales.getArtistSalesList().stream().map(ArtistSales::getArtist).toList())
+                .teams(sales.getTeamSalesList().stream().map(TeamSales::getTeam).toList())
                 .build();
     }
 }

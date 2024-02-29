@@ -1,8 +1,10 @@
 package com.happiday.Happi_Day.domain.repository;
 
 import com.happiday.Happi_Day.domain.entity.artist.Artist;
+import com.happiday.Happi_Day.domain.entity.artist.ArtistSubscription;
 import com.happiday.Happi_Day.domain.entity.product.Sales;
 import com.happiday.Happi_Day.domain.entity.team.Team;
+import com.happiday.Happi_Day.domain.entity.team.TeamSubscription;
 import com.happiday.Happi_Day.domain.entity.user.User;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -50,11 +52,11 @@ public class QuerySalesRepository {
 
 
     // 진행중인 공구/굿즈 목록
-    public Page<Sales> findSalesByFilterAndKeywordOngoing(Pageable pageable, String filter, String keyword) {
+    public Page<Sales> findSalesByFilterAndKeywordOngoing(Pageable pageable, Long categoryId, String filter, String keyword) {
         List<Sales> salesList = queryFactory
                 .selectFrom(sales)
                 .join(sales.users, user).fetchJoin()
-                .where(ongoingCondition().and(salesSearchFilter(filter, keyword)))
+                .where(ongoingCondition().and(salesSearchFilter(filter, keyword)).and(sales.salesCategory.id.eq(categoryId)))
                 .orderBy(sales.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -83,12 +85,13 @@ public class QuerySalesRepository {
     }
 
     public Page<Sales> findSalesByFilterAndKeywordAndSubscribedArtists(
-            Pageable pageable, String filter, String keyword, User loginUser
+            Pageable pageable, Long categoryId, String filter, String keyword, User loginUser
     ){
         List<Sales> salesList = queryFactory
                 .selectFrom(sales)
                 .where(subscribedArtistsCondition(loginUser)
                         .and(salesSearchFilter(filter, keyword))
+                        .and(sales.salesCategory.id.eq(categoryId))
                 )
                 .orderBy(sales.id.desc())
                 .offset(pageable.getOffset())
@@ -106,7 +109,7 @@ public class QuerySalesRepository {
     }
 
     public Page<Sales> findSalesByFilterAndKeywordAndOngoingAndSubscribedArtists(
-            Pageable pageable, String filter, String keyword, User loginUser
+            Pageable pageable, Long categoryId, String filter, String keyword, User loginUser
     ){
         List<Sales> salesList = queryFactory
                 .selectFrom(sales)
@@ -114,6 +117,7 @@ public class QuerySalesRepository {
                 .where(ongoingCondition()
                         .and(subscribedArtistsCondition(loginUser))
                         .and(salesSearchFilter(filter, keyword))
+                        .and(sales.salesCategory.id.eq(categoryId))
                 )
                 .orderBy(sales.id.desc())
                 .offset(pageable.getOffset())
@@ -138,16 +142,18 @@ public class QuerySalesRepository {
     }
 
     private BooleanExpression subscribedArtistsCondition(User loginUser) {
-        List<Long> artistIds = loginUser.getSubscribedArtists().stream()
+        List<Long> artistIds = loginUser.getArtistSubscriptionList().stream()
+                .map(ArtistSubscription::getArtist)
                 .map(Artist::getId)
                 .toList();
 
-        List<Long> teamIds = loginUser.getSubscribedTeams().stream()
+        List<Long> teamIds = loginUser.getTeamSubscriptionList().stream()
+                .map(TeamSubscription::getTeam)
                 .map(Team::getId)
                 .toList();
 
-        return sales.artists.any().id.in(artistIds)
-                .or(sales.teams.any().id.in(teamIds));
+        return sales.artistSalesList.any().artist.id.in(artistIds)
+                .or(sales.teamSalesList.any().team.id.in(teamIds));
 
     }
 }
