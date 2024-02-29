@@ -17,6 +17,8 @@ public class WriteArticleDto {
     private String content;
 
     private String eventAddress;
+    private String eventDetailAddress;
+
     private List<String> hashtag;
 
     public Article toEntity(){
@@ -24,6 +26,7 @@ public class WriteArticleDto {
                 .title(title)
                 .content(content)
                 .eventAddress(eventAddress)
+                .eventDetailAddress(eventDetailAddress)
                 .build();
     }
 

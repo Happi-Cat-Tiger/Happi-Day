@@ -72,6 +72,7 @@ public class ArticleService {
                 .teamArticleList(new ArrayList<>())
                 .articleHashtags(new ArrayList<>())
                 .eventAddress(dto.getEventAddress())
+                .eventDetailAddress(dto.getEventDetailAddress())
                 .articleLikes(new ArrayList<>())
                 .articleComments(new ArrayList<>())
                 .imageUrl(new ArrayList<>())
@@ -208,6 +209,7 @@ public class ArticleService {
                 .title(dto.getTitle())
                 .content(dto.getContent())
                 .eventAddress(dto.getEventAddress())
+                .eventDetailAddress(dto.getEventDetailAddress())
                 .build());
 
         // 아티스트와 게시글 관계 설정
