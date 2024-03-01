@@ -13,6 +13,7 @@ public class SalesListResponseDto {
     private String userNickName;
     private String name;
     private SalesStatus salesStatus;
+    private String thumbnailImage;
 
     public static SalesListResponseDto of(Sales sales) {
         return SalesListResponseDto.builder()
@@ -21,6 +22,7 @@ public class SalesListResponseDto {
                 .userNickName(sales.getUsers().getNickname())
                 .name(sales.getName())
                 .salesStatus(sales.getSalesStatus())
+                .thumbnailImage(sales.getThumbnailImage())
                 .build();
     }
 }

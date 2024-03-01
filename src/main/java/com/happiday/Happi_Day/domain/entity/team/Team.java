@@ -2,8 +2,6 @@ package com.happiday.Happi_Day.domain.entity.team;
 
 import com.happiday.Happi_Day.domain.entity.BaseEntity;
 import com.happiday.Happi_Day.domain.entity.artist.ArtistTeam;
-import com.happiday.Happi_Day.domain.entity.product.Sales;
-import com.happiday.Happi_Day.domain.entity.artist.Artist;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -19,7 +17,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SuperBuilder(toBuilder = true)
-@SQLDelete(sql="UPDATE team SET deleted_at = now() WHERE id = ?")
+@SQLDelete(sql = "UPDATE team SET deleted_at = now() WHERE id = ?")
 @Where(clause = "deleted_at IS NULL")
 public class Team extends BaseEntity {
 
@@ -54,11 +52,23 @@ public class Team extends BaseEntity {
     private List<TeamArticle> teamArticleList = new ArrayList<>();
 
     public void update(Team teamUpdate) {
-        this.name  = teamUpdate.getName();
+        this.name = teamUpdate.getName();
         this.description = teamUpdate.getDescription();
     }
 
     public void setLogoUrl(String logoUrl) {
         this.logoUrl = logoUrl;
+    }
+
+    public void setArtists(List<ArtistTeam> artistTeamList) {
+        if (this.artistTeamList == null) {
+            this.artistTeamList = new ArrayList<>();
+        } else {
+            this.artistTeamList.clear();
+        }
+
+        if (artistTeamList != null) {
+            this.artistTeamList.addAll(artistTeamList);
+        }
     }
 }

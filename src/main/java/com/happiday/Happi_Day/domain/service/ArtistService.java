@@ -21,6 +21,8 @@ import com.happiday.Happi_Day.utils.DefaultImageUtils;
 import com.happiday.Happi_Day.utils.FileUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,6 +41,7 @@ public class ArtistService {
     private final ArtistRepository artistRepository;
     private final TeamRepository teamRepository;
     private final ArtistTeamRepository artistTeamRepository;
+    private final ArtistCustomRepository artistCustomRepository;
     private final UserRepository userRepository;
     private final ArtistSubscriptionRepository subscriptionRepository;
     private final FileUtils fileUtils;
@@ -176,10 +179,9 @@ public class ArtistService {
     }
 
     // 아티스트 목록 조회
-    public List<ArtistListResponseDto> getArtists() {
-        return artistRepository.findAll().stream()
-                .map(ArtistListResponseDto::of)
-                .collect(Collectors.toList());
+    public Slice<ArtistListResponseDto> getArtists(Pageable pageable) {
+        return artistCustomRepository.findArtistsSlice(pageable)
+                .map(ArtistListResponseDto::of);
     }
 
     // 아티스트가 속한 팀 목록 조회

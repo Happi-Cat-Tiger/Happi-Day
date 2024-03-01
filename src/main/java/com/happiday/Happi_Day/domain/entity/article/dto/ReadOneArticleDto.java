@@ -22,8 +22,13 @@ import java.util.stream.Collectors;
 @Builder
 @Slf4j
 public class ReadOneArticleDto {
+    private Long id;
+    private Long categoryId;
     private String title;
+    private String thumbnailImage;
     private String content;
+    private String eventAddress;
+    private String eventDetailAddress;
     private List<String> artists;
     private List<String> teams;
     private List<String> hashtags;
@@ -36,9 +41,14 @@ public class ReadOneArticleDto {
 
     public static ReadOneArticleDto fromEntity(Article article) {
         return ReadOneArticleDto.builder()
+                .id(article.getId())
+                .categoryId(article.getCategory().getId())
                 .user(article.getUser().getNickname())
                 .title(article.getTitle())
+                .thumbnailImage(article.getThumbnailUrl())
                 .content(article.getContent())
+                .eventAddress(article.getEventAddress())
+                .eventDetailAddress(article.getEventDetailAddress())
                 .comments(ReadCommentDto.toReadCommentDto(article.getArticleComments()))
                 .artists(article.getArtistArticleList().stream().map(ArtistArticle::getArtist).map(Artist::getName).collect(Collectors.toList()))
                 .teams(article.getTeamArticleList().stream().map(TeamArticle::getTeam).map(Team::getName).collect(Collectors.toList()))
