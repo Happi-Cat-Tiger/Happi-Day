@@ -25,16 +25,16 @@ import java.util.Optional;
 class UserServiceTest {
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    DefaultImageUtils defaultImageUtils;
+    private DefaultImageUtils defaultImageUtils;
 
     @Autowired
-    PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     public void init() {
