@@ -12,7 +12,6 @@ import com.happiday.Happi_Day.domain.service.UserService;
 import com.happiday.Happi_Day.exception.CustomException;
 import com.happiday.Happi_Day.exception.ErrorCode;
 import com.happiday.Happi_Day.jwt.JwtTokenDto;
-import com.happiday.Happi_Day.utils.DefaultImageUtils;
 import com.happiday.Happi_Day.utils.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -38,7 +37,6 @@ public class UserAuthController {
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
     private final UserService userService;
-    private final DefaultImageUtils defaultImageUtils;
 
     @PostMapping("/signup")
     public ResponseEntity<String> registerUser(@Validated @RequestBody UserRegisterDto dto) {
