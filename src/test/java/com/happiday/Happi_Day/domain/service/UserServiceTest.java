@@ -7,7 +7,6 @@ import com.happiday.Happi_Day.exception.ErrorCode;
 import com.happiday.Happi_Day.utils.DefaultImageUtils;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,6 +21,7 @@ import java.util.Optional;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@Transactional
 class UserServiceTest {
 
     @Autowired
@@ -48,9 +48,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("회원가입")
-    @Transactional
-    void createUser() {
+    void 회원가입_성공(){
         // given
         UserRegisterDto dto = new UserRegisterDto();
         dto.setUsername("user@email.com");
@@ -68,9 +66,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("회원가입 전화번호 입력 오류")
-    @Transactional
-    void createUser_isValidPhone() {
+    void 회원가입_실패_전화번호_입력_오류() {
         // given
         UserRegisterDto dto = new UserRegisterDto();
         dto.setUsername("user@email.com");
@@ -86,9 +82,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("회원가입 이메일 입력 오류")
-    @Transactional
-    void createUser_isValidUsername() {
+    void 회원가입_실패_이메일_입력_오류() {
         // given
         UserRegisterDto dto = new UserRegisterDto();
         dto.setUsername("user@emailcom");
@@ -104,9 +98,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("회원가입 이메일 중복 오류")
-    @Transactional
-    void createUser_isDuplicatedUsername() {
+    void 회원가입_실패_이메일_중복() {
         // given
         UserRegisterDto dto = new UserRegisterDto();
         dto.setUsername("test@email.com");
@@ -122,9 +114,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("회원가입 닉네임 중복 오류")
-    @Transactional
-    void createUser_isDuplicatedNickname() {
+    void 회원가입_실패_닉네임_중복() {
         // given
         UserRegisterDto dto = new UserRegisterDto();
         dto.setUsername("user@email.com");
@@ -140,9 +130,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("회원가입 전화번호 중복 오류")
-    @Transactional
-    void createUser_isDuplicatedPhone() {
+    void 회원가입_실패_전화번호_중복() {
         // given
         UserRegisterDto dto = new UserRegisterDto();
         dto.setUsername("user@email.com");
@@ -158,9 +146,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("회원정보 수정")
-    @Transactional
-    void updateUser() {
+    void 회원정보_수정_성공() {
         // given
         UserUpdateDto dto = UserUpdateDto.builder()
                 .nickname("닉네임2")
@@ -178,9 +164,49 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("회원정보 이미지 수정")
-    @Transactional
-    void changeProfileImage() {
+    void 회원정보_수정_실패_닉네임_중복() {
+        // given
+        UserUpdateDto dto = UserUpdateDto.builder()
+                .nickname("테스트")
+                .password("qwer12345")
+                .phone("01012341111")
+                .build();
+
+        // when // then
+        Assertions.assertThatThrownBy(() -> userService.updateUserProfile("test@email.com", dto))
+                .hasMessage(ErrorCode.NICKNAME_CONFLICT.getMessage());
+    }
+
+    @Test
+    void 회원정보_수정_실패_전화번호_중복() {
+        // given
+        UserUpdateDto dto = UserUpdateDto.builder()
+                .nickname("닉네임2")
+                .password("qwer12345")
+                .phone("01012341234")
+                .build();
+
+        // when // then
+        Assertions.assertThatThrownBy(() -> userService.updateUserProfile("test@email.com", dto))
+                .hasMessage(ErrorCode.PHONE_CONFLICT.getMessage());
+    }
+
+    @Test
+    void 회원정보_수정_실패_전화번호_입력_오류() {
+        // given
+        UserUpdateDto dto = UserUpdateDto.builder()
+                .nickname("닉네임2")
+                .password("qwer12345")
+                .phone("010123411110")
+                .build();
+
+        // when // then
+        Assertions.assertThatThrownBy(() -> userService.updateUserProfile("test@email.com", dto))
+                .hasMessage(ErrorCode.PHONE_FORMAT_ERROR.getMessage());
+    }
+
+    @Test
+    void 회원정보_프로필이미지_수정() {
         // given
         MultipartFile file = new MockMultipartFile(
                 "profile", "image.jpg", MediaType.IMAGE_JPEG_VALUE, "ImageData".getBytes()
@@ -195,9 +221,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("회원정보 기본 이미지로 변경")
-    @Transactional
-    void changeProfileImageDefault() {
+    void 회원정보_프로필이미지_기본이미지_초기화() {
         // given
 
         // when
@@ -209,9 +233,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("회원탈퇴")
-    @Transactional
-    void deleteUser() {
+    void 회원탈퇴_성공() {
         // given
         UserPWDto dto = new UserPWDto("qwer1234");
 
@@ -223,9 +245,17 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("비밀번호 찾기를 위한 본인 인증 후 이메일로 인증번호 전송")
-    @Transactional
-    void findPassword() {
+    void 회원탈퇴_실패() {
+        // given
+        UserPWDto dto = new UserPWDto("qwer12345");
+
+        // when // then
+        Assertions.assertThatThrownBy(() -> userService.deleteUser("test@email.com", dto))
+                .hasMessage(ErrorCode.PASSWORD_NOT_MATCHED.getMessage());
+    }
+
+    @Test
+    void 비밀번호찾기_성공_본인인증_인증번호발송() {
         // given
         UserFindDto dto = new UserFindDto("김철수", "test@email.com");
 
@@ -237,29 +267,48 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("이메일로 온 인증번호와 입력한 인증번호 비교")
-    @Transactional
-    void checkEmail() {
+    void 비밀번호찾기_실패_본인인증_오류() {
+        // given
+        UserFindDto dto1 = new UserFindDto("김철", "test@email.com");
+        UserFindDto dto2 = new UserFindDto("김철수", "testt@email.com");
+
+        // when // then
+        Assertions.assertThatThrownBy(() -> userService.findPassword(dto1))
+                .hasMessage(ErrorCode.USER_NOT_FOUND.getMessage());
+        Assertions.assertThatThrownBy(() -> userService.findPassword(dto2))
+                .hasMessage(ErrorCode.USER_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    void 비밀번호찾기_성공_인증번호입력() {
         // given
         UserFindDto dto = new UserFindDto("김철수", "test@email.com");
         String number = userService.findPassword(dto);
 
         UserNumDto dto2 = new UserNumDto("test@email.com", number);
-        UserNumDto dto3 = new UserNumDto("test@email.com", "1111111");
 
         // when
         Boolean result1 = userService.checkEmail(dto2);
 
         // then
         Assertions.assertThat(result1).isTrue();
-        Assertions.assertThatThrownBy(() -> userService.checkEmail(dto3))
+    }
+
+    @Test
+    void 비밀번호찾기_실패_인증번호입력_오류() {
+        // given
+        UserFindDto dto = new UserFindDto("김철수", "test@email.com");
+        String number = userService.findPassword(dto);
+
+        UserNumDto dto2 = new UserNumDto("test@email.com", "1111111");
+
+        // when // then
+        Assertions.assertThatThrownBy(() -> userService.checkEmail(dto2))
                 .hasMessage(ErrorCode.CODE_NOT_MATCHED.getMessage());
     }
 
     @Test
-    @DisplayName("인증 완료 후 비밀번호 변경")
-    @Transactional
-    void changePassword() {
+    void 비밀번호찾기_성공_비밀번호변경() {
         // given
         UserLoginDto dto = new UserLoginDto("test@email.com", "test1234");
 
