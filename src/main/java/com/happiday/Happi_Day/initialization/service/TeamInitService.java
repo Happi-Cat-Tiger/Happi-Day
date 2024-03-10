@@ -45,5 +45,24 @@ public class TeamInitService {
                 throw new CustomException(ErrorCode.DB_SEEDER_TEAM_SAVE_ERROR);
             }
         });
+
+        // 추가적인 덤프 데이터
+        for (int i = 1; i <= 40; i++) {
+            String teamName = "팀 " + i;
+            Team team = Team.builder()
+                    .name(teamName)
+                    .description(teamName + "입니다.")
+                    .logoUrl(imageUrl)
+                    .build();
+
+            try {
+                if (!teamRepository.existsByName(team.getName())) {
+                    teamRepository.save(team);
+                }
+            } catch (Exception e) {
+                log.error("DB Seeder 팀 저장 중 예외 발생 - 팀명: {}", team.getName(), e);
+                throw new CustomException(ErrorCode.DB_SEEDER_TEAM_SAVE_ERROR);
+            }
+        }
     }
 }
