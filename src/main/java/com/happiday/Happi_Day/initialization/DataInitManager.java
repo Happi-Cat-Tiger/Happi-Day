@@ -24,6 +24,7 @@ public class DataInitManager {
     private final ProductInitService productInitService;
     private final DeliveryInitService deliveryInitService;
     private final OrderInitService orderInitService;
+    private final SubscriptionInitService subscriptionInitService;
 
     public void init() {
         log.info("initialize start~~");
@@ -41,6 +42,6 @@ public class DataInitManager {
         productInitService.initProducts();
         deliveryInitService.initDeliveries();
         orderInitService.initOrders();
-
+        subscriptionInitService.initSubscription();
     }
 }
