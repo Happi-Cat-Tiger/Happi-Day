@@ -54,6 +54,25 @@ public class ArtistInitService {
                 throw new CustomException(ErrorCode.DB_SEEDER_ARTIST_SAVE_ERROR);
             }
         });
+
+        // 추가적인 덤프 데이터
+        for (int i = 1; i <= 40; i++) {
+            String artistName = "아티스트 " + i;
+            Artist artist = createArtist(artistName, artistName + "입니다.", imageUrl);
+
+            List<Long> teamIds = List.of((3L));
+
+            try {
+                if (!artistRepository.existsByName(artist.getName())) {
+                    // 아티스트 및 팀 연결
+                    artistRepository.save(artist);
+                    linkTeamsToArtist(artist, teamIds);
+                }
+            } catch (Exception e) {
+                log.error("DB Seeder 아티스트 저장 중 예외 발생 - 아티스트명: {}", artist.getName(), e);
+                throw new CustomException(ErrorCode.DB_SEEDER_ARTIST_SAVE_ERROR);
+            }
+        }
     }
 
     private Artist createArtist(String name, String description, String imageUrl) {
