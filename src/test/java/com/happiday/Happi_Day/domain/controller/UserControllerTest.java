@@ -84,8 +84,7 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("회원정보 가져오기")
-    void getUser() throws Exception {
+    void 회원정보조회_성공() throws Exception {
         when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
 
         mockMvc.perform(get("/api/v1/user/info"))
@@ -94,8 +93,7 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("회원정보 수정")
-    void updateUser() throws Exception {
+    void 회원정보수정_성공() throws Exception {
         when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
 
         UserUpdateDto dto = UserUpdateDto.builder()
@@ -119,8 +117,77 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("회원정보 이미지 수정")
-    void changeImage() throws Exception {
+    void 회원정보수정_실패_닉네임중복() throws Exception {
+        when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
+
+        UserUpdateDto dto = UserUpdateDto.builder()
+                .nickname("테스트")
+                .phone("01012345678")
+                .password("qwer12345")
+                .build();
+
+        String body = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(patch("/api/v1/user/info")
+                        .content(body)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isConflict());
+
+        Optional<User> user = userRepository.findByUsername("test@email.com");
+
+        Assertions.assertThat(dto.getPhone()).isNotEqualTo(user.get().getPhone());
+    }
+
+    @Test
+    void 회원정보수정_실패_전화번호중복() throws Exception {
+        when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
+
+        UserUpdateDto dto = UserUpdateDto.builder()
+                .nickname("테스트2")
+                .phone("01012341234")
+                .password("qwer12345")
+                .build();
+
+        String body = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(patch("/api/v1/user/info")
+                        .content(body)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isConflict());
+
+        Optional<User> user = userRepository.findByUsername("test@email.com");
+
+        Assertions.assertThat(dto.getNickname()).isNotEqualTo(user.get().getNickname());
+    }
+
+    @Test
+    void 회원정보수정_실패_전화번호입력오류() throws Exception {
+        when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
+
+        UserUpdateDto dto = UserUpdateDto.builder()
+                .nickname("테스트2")
+                .phone("010123456789")
+                .password("qwer12345")
+                .build();
+
+        String body = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(patch("/api/v1/user/info")
+                        .content(body)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+
+        Optional<User> user = userRepository.findByUsername("test@email.com");
+
+        Assertions.assertThat(dto.getNickname()).isNotEqualTo(user.get().getNickname());
+        Assertions.assertThat(dto.getPhone()).isNotEqualTo(user.get().getPhone());
+    }
+
+    @Test
+    void 회원정보이미지수정_성공() throws Exception {
         when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
 
         MockMultipartFile profileImage = new MockMultipartFile(
@@ -140,8 +207,7 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("회원정보 이미지 초기화")
-    void resetImage() throws Exception {
+    void 회원정보이미지초기화_성공() throws Exception {
         when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
 
         mockMvc.perform(multipart(HttpMethod.PATCH, "/api/v1/user/info/default"))
@@ -155,8 +221,7 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("회원탈퇴")
-    void withdrawUser() throws Exception {
+    void 회원탈퇴_성공() throws Exception {
         when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
 
         UserPWDto dto = new UserPWDto("qwer1234");
@@ -170,6 +235,23 @@ class UserControllerTest {
                 .andExpect(status().isOk());
 
         Assertions.assertThat(userRepository.existsByUsername("test@email.com")).isFalse();
+    }
+
+    @Test
+    void 회원탈퇴_실패() throws Exception {
+        when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
+
+        UserPWDto dto = new UserPWDto("qwer12345");
+
+        String body = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(delete("/api/v1/user/withdrawal")
+                        .content(body)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+
+        Assertions.assertThat(userRepository.existsByUsername("test@email.com")).isTrue();
     }
 
 //    @Test
