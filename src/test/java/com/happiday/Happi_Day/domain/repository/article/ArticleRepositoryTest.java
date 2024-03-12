@@ -116,29 +116,6 @@ public class ArticleRepositoryTest {
         assertThat(foundArticle.getContent().get(0).getTitle()).isEqualTo(testTitle);
     }
 
-//    @Test
-//    @DisplayName("좋아요 누른 유저의 글 조회")
-//    public void findArticleByArticleLikesUserTest(){
-//        // given
-//        String testTitle = "test title";
-//        Optional<User> testUser = userRepository.findById(article.getUser().getId());
-//        System.out.println(testUser.get().getNickname());
-//        ArticleLike newArticleLike = ArticleLike.builder()
-//                .article(article)
-//                .user(testUser.get())
-//                .build();
-//        articleLikeRepository.save(newArticleLike);
-//        Pageable pageable = PageRequest.of(0, 12);
-//
-//        // when
-//        System.out.println(testUser.get() instanceof User);
-//        Page<Article> foundArticle = articleRepository.findAllByArticleLikesUserContains(newArticleLike.getUser(), pageable);
-//
-//        // then
-//        assertThat(foundArticle).isNotEmpty();
-//        assertThat(foundArticle.getContent().get(0).getArticleLikes()).contains(newArticleLike);
-//    }
-
     @Test
     @DisplayName("글 제목으로 존재 여부 확인")
     public void existsArticleByTitleTest() {
