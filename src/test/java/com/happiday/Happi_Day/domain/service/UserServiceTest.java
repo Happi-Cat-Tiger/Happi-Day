@@ -66,7 +66,7 @@ class UserServiceTest {
     }
 
     @Test
-    void 회원가입_실패_전화번호_입력_오류() {
+    void 회원가입_실패_전화번호입력오류() {
         // given
         UserRegisterDto dto = new UserRegisterDto();
         dto.setUsername("user@email.com");
@@ -82,7 +82,7 @@ class UserServiceTest {
     }
 
     @Test
-    void 회원가입_실패_이메일_입력_오류() {
+    void 회원가입_실패_이메일입력오류() {
         // given
         UserRegisterDto dto = new UserRegisterDto();
         dto.setUsername("user@emailcom");
@@ -98,7 +98,7 @@ class UserServiceTest {
     }
 
     @Test
-    void 회원가입_실패_이메일_중복() {
+    void 회원가입_실패_이메일중복() {
         // given
         UserRegisterDto dto = new UserRegisterDto();
         dto.setUsername("test@email.com");
@@ -114,7 +114,7 @@ class UserServiceTest {
     }
 
     @Test
-    void 회원가입_실패_닉네임_중복() {
+    void 회원가입_실패_닉네임중복() {
         // given
         UserRegisterDto dto = new UserRegisterDto();
         dto.setUsername("user@email.com");
@@ -130,7 +130,7 @@ class UserServiceTest {
     }
 
     @Test
-    void 회원가입_실패_전화번호_중복() {
+    void 회원가입_실패_전화번호중복() {
         // given
         UserRegisterDto dto = new UserRegisterDto();
         dto.setUsername("user@email.com");
@@ -146,7 +146,7 @@ class UserServiceTest {
     }
 
     @Test
-    void 회원정보_수정_성공() {
+    void 회원정보수정_성공() {
         // given
         UserUpdateDto dto = UserUpdateDto.builder()
                 .nickname("닉네임2")
@@ -164,7 +164,7 @@ class UserServiceTest {
     }
 
     @Test
-    void 회원정보_수정_실패_닉네임_중복() {
+    void 회원정보수정_실패_닉네임중복() {
         // given
         UserUpdateDto dto = UserUpdateDto.builder()
                 .nickname("테스트")
@@ -178,7 +178,7 @@ class UserServiceTest {
     }
 
     @Test
-    void 회원정보_수정_실패_전화번호_중복() {
+    void 회원정보수정_실패_전화번호중복() {
         // given
         UserUpdateDto dto = UserUpdateDto.builder()
                 .nickname("닉네임2")
@@ -192,7 +192,7 @@ class UserServiceTest {
     }
 
     @Test
-    void 회원정보_수정_실패_전화번호_입력_오류() {
+    void 회원정보수정_실패_전화번호입력오류() {
         // given
         UserUpdateDto dto = UserUpdateDto.builder()
                 .nickname("닉네임2")
@@ -206,7 +206,7 @@ class UserServiceTest {
     }
 
     @Test
-    void 회원정보_프로필이미지_수정() {
+    void 회원정보_프로필이미지수정_성공() {
         // given
         MultipartFile file = new MockMultipartFile(
                 "profile", "image.jpg", MediaType.IMAGE_JPEG_VALUE, "ImageData".getBytes()
@@ -221,7 +221,7 @@ class UserServiceTest {
     }
 
     @Test
-    void 회원정보_프로필이미지_기본이미지_초기화() {
+    void 회원정보_프로필이미지초기화_성공() {
         // given
 
         // when
@@ -267,7 +267,7 @@ class UserServiceTest {
     }
 
     @Test
-    void 비밀번호찾기_실패_본인인증_오류() {
+    void 비밀번호찾기_실패_본인인증오류() {
         // given
         UserFindDto dto1 = new UserFindDto("김철", "test@email.com");
         UserFindDto dto2 = new UserFindDto("김철수", "testt@email.com");
