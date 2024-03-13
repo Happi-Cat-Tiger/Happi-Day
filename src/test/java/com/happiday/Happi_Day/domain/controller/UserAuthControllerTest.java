@@ -8,6 +8,7 @@ import com.happiday.Happi_Day.domain.entity.user.dto.UserLoginDto;
 import com.happiday.Happi_Day.domain.entity.user.dto.UserRegisterDto;
 import com.happiday.Happi_Day.domain.repository.UserRepository;
 import com.happiday.Happi_Day.utils.SecurityUtils;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
@@ -72,8 +74,7 @@ class UserAuthControllerTest {
     }
 
     @Test
-    @DisplayName("회원가입")
-    void registerUser() throws Exception {
+    void 회원가입_성공() throws Exception {
         UserRegisterDto dto = new UserRegisterDto();
         dto.setUsername("user@email.com");
         dto.setPassword("qwer1234");
@@ -91,8 +92,87 @@ class UserAuthControllerTest {
     }
 
     @Test
-    @DisplayName("로그인")
-    void login() throws Exception {
+    void 회원가입_실패_전화번호입력오류() throws Exception {
+        UserRegisterDto dto = new UserRegisterDto();
+        dto.setUsername("user@email.com");
+        dto.setPassword("qwer1234");
+        dto.setNickname("닉네임");
+        dto.setRealname("가나다");
+        dto.setPhone("010123456789");
+
+        String body = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post("/api/v1/auth/signup")
+                        .content(body)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+
+        Assertions.assertThat(userRepository.existsByUsername("user@email.com")).isFalse();
+    }
+
+    @Test
+    void 회원가입_실패_이메일입력오류() throws Exception {
+        UserRegisterDto dto = new UserRegisterDto();
+        dto.setUsername("useremail.com");
+        dto.setPassword("qwer1234");
+        dto.setNickname("닉네임");
+        dto.setRealname("가나다");
+        dto.setPhone("01012345678");
+
+        String body = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post("/api/v1/auth/signup")
+                        .content(body)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+
+        Assertions.assertThat(userRepository.existsByPhone("01012345678")).isFalse();
+    }
+
+    @Test
+    void 회원가입_실패_이메일중복() throws Exception {
+        UserRegisterDto dto = new UserRegisterDto();
+        dto.setUsername("test@email.com");
+        dto.setPassword("qwer1234");
+        dto.setNickname("닉네임");
+        dto.setRealname("가나다");
+        dto.setPhone("01012345678");
+
+        String body = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post("/api/v1/auth/signup")
+                        .content(body)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isConflict());
+
+        Assertions.assertThat(userRepository.existsByPhone("01012345678")).isFalse();
+    }
+
+    @Test
+    void 회원가입_실패_전화번호중복() throws Exception {
+        UserRegisterDto dto = new UserRegisterDto();
+        dto.setUsername("user@email.com");
+        dto.setPassword("qwer1234");
+        dto.setNickname("닉네임");
+        dto.setRealname("가나다");
+        dto.setPhone("01012341234");
+
+        String body = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post("/api/v1/auth/signup")
+                        .content(body)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isConflict());
+
+        Assertions.assertThat(userRepository.existsByUsername("user@email.com")).isFalse();
+    }
+
+    @Test
+    void 로그인_성공() throws Exception {
         UserLoginDto dto = new UserLoginDto("test@email.com", "qwer1234");
 
         String body = objectMapper.writeValueAsString(dto);
@@ -102,11 +182,40 @@ class UserAuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk());
+
+        Optional<User> user = userRepository.findByUsername("test@email.com");
+
+        Assertions.assertThat(user.get().getLastLoginAt()).isNotNull();
     }
 
     @Test
-    @DisplayName("로그아웃")
-    void logout() throws Exception {
+    void 로그인_실패_이메일불일치() throws Exception {
+        UserLoginDto dto = new UserLoginDto("test1@email.com", "qwer1234");
+
+        String body = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .content(body)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void 로그인_실패_비밀번호불일치() throws Exception {
+        UserLoginDto dto = new UserLoginDto("test@email.com", "qwer12345");
+
+        String body = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .content(body)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void 로그아웃_성공() throws Exception {
         when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
 
         mockMvc.perform(get("/api/v1/auth/logout"))
@@ -116,8 +225,7 @@ class UserAuthControllerTest {
     }
 
     @Test
-    @DisplayName("관리자 회원가입")
-    void registerAdmin() throws Exception {
+    void 회원가입관리자_성공() throws Exception {
         UserRegisterDto dto = new UserRegisterDto();
         dto.setUsername("admin@email.com");
         dto.setPassword("qwer1234");
@@ -135,8 +243,7 @@ class UserAuthControllerTest {
     }
 
     @Test
-    @DisplayName("비밀번호 찾기")
-    void findPassword() throws Exception {
+    void 비밀번호찾기_성공() throws Exception {
         UserFindDto dto = new UserFindDto("김철수", "test@email.com");
 
         String body = objectMapper.writeValueAsString(dto);
@@ -149,8 +256,7 @@ class UserAuthControllerTest {
     }
 
     @Test
-    @DisplayName("이메일 확인")
-    void checkEmail() throws Exception {
+    void 이메일확인_성공() throws Exception {
 //        UserFindDto dto1 = new UserFindDto("김철수", "test@email.com");
 //        String body1 = objectMapper.writeValueAsString(dto1);
 //        MvcResult result = mockMvc.perform(post("/api/v1/auth/find")
@@ -171,8 +277,7 @@ class UserAuthControllerTest {
     }
 
     @Test
-    @DisplayName("비밀번호 변경")
-    void changePassword() throws Exception {
+    void 비밀번호변경_성공() throws Exception {
         UserLoginDto dto = new UserLoginDto("test@email.com", "newpassword");
         String body = objectMapper.writeValueAsString(dto);
         mockMvc.perform(post("/api/v1/auth/password")

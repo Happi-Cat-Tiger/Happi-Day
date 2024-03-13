@@ -9,6 +9,7 @@ import com.happiday.Happi_Day.domain.service.UserService;
 import com.happiday.Happi_Day.exception.CustomException;
 import com.happiday.Happi_Day.exception.ErrorCode;
 import com.happiday.Happi_Day.jwt.JwtTokenDto;
+import com.happiday.Happi_Day.jwt.JwtTokenResponse;
 import com.happiday.Happi_Day.utils.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -47,9 +48,8 @@ public class UserAuthController {
         if (!passwordEncoder.matches(dto.getPassword(), userDetails.getPassword()))
             throw new CustomException(ErrorCode.PASSWORD_NOT_MATCHED);
 
-        String accessToken = tokenService.setToken(dto.getUsername());
-        JwtTokenDto token = new JwtTokenDto();
-        token.setToken(accessToken);
+        JwtTokenResponse tokenResponse = tokenService.setToken(dto.getUsername());
+        JwtTokenDto token = new JwtTokenDto(tokenResponse.getAccessToken());
 
         User user = userRepository.findByUsername(dto.getUsername()).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         user.setLastLoginAt(LocalDateTime.now());
