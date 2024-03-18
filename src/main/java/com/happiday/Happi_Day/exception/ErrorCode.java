@@ -89,6 +89,7 @@ public enum ErrorCode {
     ORDER_FAILED(HttpStatus.BAD_REQUEST, "취소할 수 없는 주문입니다."),
     ORDER_CANT_DELETE(HttpStatus.UNAUTHORIZED, "삭제할 수 없는 주문입니다."),
     DELIVERY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 배달방법입니다."),
+    DELIVERY_IS_EMPTY(HttpStatus.BAD_REQUEST, "배송방법을 한 개 이상 추가해주세요."),
     OUT_OF_STOCK(HttpStatus.BAD_REQUEST, "해당 상품은 품절입니다."),
     START_TIME_ERROR(HttpStatus.BAD_REQUEST, "현재보다 이전 시간은 선택할 수 없습니다."),
     END_TIME_ERROR(HttpStatus.BAD_REQUEST, "시작 시간보다 이전 시간은 선택할 수 없습니다.");

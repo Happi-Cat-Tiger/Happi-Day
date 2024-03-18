@@ -42,32 +42,32 @@ public class DeliveryService {
         return deliveryList.stream().map(ReadDeliveryDto::fromEntity).collect(Collectors.toList());
     }
 
-    public List<ReadDeliveryDto> readDelivery(Long salesId, String username){
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        Sales sales = salesRepository.findById(salesId)
-                .orElseThrow(() -> new CustomException(ErrorCode.SALES_NOT_FOUND));
-        // user 확인
-        if(!user.equals(sales.getUsers())) throw new CustomException(ErrorCode.FORBIDDEN);
+//    public List<ReadDeliveryDto> readDelivery(Long salesId, String username){
+//        User user = userRepository.findByUsername(username)
+//                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+//        Sales sales = salesRepository.findById(salesId)
+//                .orElseThrow(() -> new CustomException(ErrorCode.SALES_NOT_FOUND));
+//        // user 확인
+//        if(!user.equals(sales.getUsers())) throw new CustomException(ErrorCode.FORBIDDEN);
+//
+//        List<Delivery> deliveryList = deliveryRepository.findAllBySales(sales);
+//        return deliveryList.stream().map(ReadDeliveryDto::fromEntity).collect(Collectors.toList());
+//    }
 
-        List<Delivery> deliveryList = deliveryRepository.findAllBySales(sales);
-        return deliveryList.stream().map(ReadDeliveryDto::fromEntity).collect(Collectors.toList());
-    }
-
-    @Transactional
-    public List<ReadDeliveryDto> deleteDelivery(Long salesId, Long deliveryId, String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        Sales sales = salesRepository.findById(salesId)
-                .orElseThrow(() -> new CustomException(ErrorCode.SALES_NOT_FOUND));
-        Delivery delivery = deliveryRepository.findById(deliveryId)
-                .orElseThrow(() -> new CustomException(ErrorCode.DELIVERY_NOT_FOUND));
-        // user 확인
-        if(!user.equals(sales.getUsers())) throw new CustomException(ErrorCode.FORBIDDEN);
-
-        deliveryRepository.delete(delivery);
-
-        List<Delivery> deliveryList = deliveryRepository.findAllBySales(sales);
-        return deliveryList.stream().map(ReadDeliveryDto::fromEntity).collect(Collectors.toList());
-    }
+//    @Transactional
+//    public List<ReadDeliveryDto> deleteDelivery(Long salesId, Long deliveryId, String username) {
+//        User user = userRepository.findByUsername(username)
+//                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+//        Sales sales = salesRepository.findById(salesId)
+//                .orElseThrow(() -> new CustomException(ErrorCode.SALES_NOT_FOUND));
+//        Delivery delivery = deliveryRepository.findById(deliveryId)
+//                .orElseThrow(() -> new CustomException(ErrorCode.DELIVERY_NOT_FOUND));
+//        // user 확인
+//        if(!user.equals(sales.getUsers())) throw new CustomException(ErrorCode.FORBIDDEN);
+//
+//        deliveryRepository.delete(delivery);
+//
+//        List<Delivery> deliveryList = deliveryRepository.findAllBySales(sales);
+//        return deliveryList.stream().map(ReadDeliveryDto::fromEntity).collect(Collectors.toList());
+//    }
 }

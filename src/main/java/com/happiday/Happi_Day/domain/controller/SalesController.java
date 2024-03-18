@@ -30,10 +30,11 @@ public class SalesController {
             @PathVariable("categoryId") Long id,
             @Valid @RequestPart(name = "sale") WriteSalesDto requestDto,
             @RequestPart(name = "products") List<CreateProductDto> productDtos,
+            @RequestPart(name = "delivery") List<CreateDeliveryDto> deliveryDtos,
             @RequestPart(name = "thumbnailImage", required = false) MultipartFile thumbnailImage,
             @RequestPart(name = "imageFile", required = false) List<MultipartFile> imageFile) {
         String username = SecurityUtils.getCurrentUsername();
-        ReadOneSalesDto response = salesService.createSales(id, requestDto, productDtos, thumbnailImage, imageFile, username);
+        ReadOneSalesDto response = salesService.createSales(id, requestDto, productDtos, deliveryDtos, thumbnailImage, imageFile, username);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
@@ -105,10 +106,11 @@ public class SalesController {
             @PathVariable("salesId") Long salesId,
             @RequestPart(name = "sale") UpdateSalesDto requestDto,
             @RequestPart(name = "products") List<CreateProductDto> productDtos,
+            @RequestPart(name = "delivery") List<CreateDeliveryDto> deliveryDtos,
             @RequestPart(name = "thumbnailImage", required = false) MultipartFile thumbnailImage,
             @RequestPart(name = "imageFile", required = false) List<MultipartFile> imageFile) {
         String username = SecurityUtils.getCurrentUsername();
-        ReadOneSalesDto responseSales = salesService.updateSales(salesId, requestDto, productDtos, thumbnailImage, imageFile, username);
+        ReadOneSalesDto responseSales = salesService.updateSales(salesId, requestDto, productDtos, deliveryDtos, thumbnailImage, imageFile, username);
         return new ResponseEntity<>(responseSales, HttpStatus.OK);
     }
 

@@ -48,9 +48,11 @@ public class SalesService {
     private final SalesLikeRepository salesLikeRepository;
     private final SalesHashtagRepository salesHashtagRepository;
     private final ProductService productService;
+    private final DeliveryRepository deliveryRepository;
+    private final DeliveryService deliveryService;
 
     @Transactional
-    public ReadOneSalesDto createSales(Long categoryId, WriteSalesDto salesDto, List<CreateProductDto> productDtos, MultipartFile thumbnailImage, List<MultipartFile> imageFile, String username) {
+    public ReadOneSalesDto createSales(Long categoryId, WriteSalesDto salesDto, List<CreateProductDto> productDtos, List<CreateDeliveryDto> deliveryDtos, MultipartFile thumbnailImage, List<MultipartFile> imageFile, String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
@@ -63,7 +65,12 @@ public class SalesService {
         }
         List<Product> productList = new ArrayList<>();
 
-        if (salesDto.getEndTime().isBefore(salesDto.getStartTime())) throw new CustomException(ErrorCode.END_TIME_ERROR);
+        if (deliveryDtos.isEmpty()) {
+            throw new CustomException(ErrorCode.DELIVERY_IS_EMPTY);
+        }
+
+        if (salesDto.getEndTime().isBefore(salesDto.getStartTime()))
+            throw new CustomException(ErrorCode.END_TIME_ERROR);
 
         HashtagUtils hashtagUtils = new HashtagUtils(artistRepository, teamRepository, hashtagRepository);
         Triple<List<Artist>, List<Team>, List<Hashtag>> processedTags = hashtagUtils.processTags(salesDto.getHashtag());
@@ -140,9 +147,15 @@ public class SalesService {
         salesRepository.save(newSales);
 
         // 상품 옵션 저장
-        for (CreateProductDto productDto: productDtos) {
+        for (CreateProductDto productDto : productDtos) {
             productService.createProduct(newSales.getId(), productDto, user.getUsername());
         }
+
+        // 배송방법 저장
+        for (CreateDeliveryDto deliveryDto : deliveryDtos) {
+            deliveryService.createDelivery(newSales.getId(), deliveryDto, user.getUsername());
+        }
+
         salesRepository.save(newSales);
 
         ReadOneSalesDto.fromEntity(newSales, new ArrayList<>());
@@ -214,7 +227,7 @@ public class SalesService {
     }
 
     @Transactional
-    public ReadOneSalesDto updateSales(Long salesId, UpdateSalesDto salesDto, List<CreateProductDto> productDtos, MultipartFile thumbnailImage, List<MultipartFile> imageFile, String username) {
+    public ReadOneSalesDto updateSales(Long salesId, UpdateSalesDto salesDto, List<CreateProductDto> productDtos, List<CreateDeliveryDto> deliveryDtos, MultipartFile thumbnailImage, List<MultipartFile> imageFile, String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
@@ -224,7 +237,8 @@ public class SalesService {
         // user 확인
         if (!user.equals(sales.getUsers())) throw new CustomException(ErrorCode.FORBIDDEN);
 
-        if (salesDto.getEndTime().isBefore(salesDto.getStartTime())) throw new CustomException(ErrorCode.END_TIME_ERROR);
+        if (salesDto.getEndTime().isBefore(salesDto.getStartTime()))
+            throw new CustomException(ErrorCode.END_TIME_ERROR);
 
         HashtagUtils hashtagUtils = new HashtagUtils(artistRepository, teamRepository, hashtagRepository);
         Triple<List<Artist>, List<Team>, List<Hashtag>> processedTags = hashtagUtils.processTags(salesDto.getHashtag());
@@ -334,14 +348,22 @@ public class SalesService {
         salesRepository.save(sales);
 
         // 상품 옵션 저장
-        for (CreateProductDto productDto: productDtos) {
+        for (CreateProductDto productDto : productDtos) {
             Optional<Product> product = productRepository.findByNameAndSales(productDto.getName(), sales);
-            if(product.isPresent()){
+            if (product.isPresent()) {
                 productService.updateProduct(salesId, product.get().getId(), productDto, username);
-            }else{
+            } else {
                 productService.createProduct(salesId, productDto, username);
             }
         }
+
+        // 배송방법 저장
+        deliveryRepository.deleteAllBySales(sales);
+
+        for (CreateDeliveryDto deliveryDto : deliveryDtos) {
+            deliveryService.createDelivery(salesId, deliveryDto, username);
+        }
+
         salesRepository.save(sales);
 
         List<ReadProductDto> dtoList = new ArrayList<>();
