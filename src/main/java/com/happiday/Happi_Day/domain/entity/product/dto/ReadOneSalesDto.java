@@ -22,6 +22,7 @@ public class ReadOneSalesDto {
     private String salesCategory;
     private String user;
     private String name;
+    private Integer namePrice;
     private String description;
     private String salesStatus;
     private List<ReadProductDto> products;
@@ -30,12 +31,15 @@ public class ReadOneSalesDto {
     private List<String> hashtags;
     private int likeNum;
     private List<String> imageList;
+    private String accountName;
+    private String accountUser;
+    private String accountNumber;
     private List<ReadDeliveryDto> deliveries;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private int viewCount;
 
-    public static ReadOneSalesDto fromEntity(Sales sales, List<ReadProductDto> productList){
+    public static ReadOneSalesDto fromEntity(Sales sales, List<ReadProductDto> productList) {
 
         List<ReadDeliveryDto> deliveries = sales.getDeliveries() != null ? sales.getDeliveries().stream().map(ReadDeliveryDto::fromEntity).collect(Collectors.toList()) : Collections.emptyList();
 
@@ -44,6 +48,7 @@ public class ReadOneSalesDto {
                 .salesCategory(sales.getSalesCategory().getName())
                 .user(sales.getUsers().getNickname())
                 .name(sales.getName())
+                .namePrice(sales.getNamePrice())
                 .description(sales.getDescription())
                 .salesStatus(sales.getSalesStatus().getValue())
                 .products(productList)
@@ -52,6 +57,9 @@ public class ReadOneSalesDto {
                 .artists(sales.getArtistSalesList().stream().map(ArtistSales::getArtist).map(Artist::getName).collect(Collectors.toList()))
                 .teams(sales.getTeamSalesList().stream().map(TeamSales::getTeam).map(Team::getName).collect(Collectors.toList()))
                 .hashtags(sales.getSalesHashtags().stream().map(SalesHashtag::getHashtag).map(Hashtag::getTag).collect(Collectors.toList()))
+                .accountName(sales.getAccountName())
+                .accountUser(sales.getAccountUser())
+                .accountNumber(sales.getAccountNumber())
                 .deliveries(deliveries)
                 .startTime(sales.getStartTime())
                 .endTime(sales.getEndTime())

@@ -40,6 +40,9 @@ public class Sales extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
+    private Integer namePrice;
+
     @Column(columnDefinition = "TEXT")
     private String description;
 
@@ -55,7 +58,13 @@ public class Sales extends BaseEntity {
     private List<String> imageUrl = new ArrayList<>();
 
     @Column(nullable = false)
-    private String account;
+    private String accountName;
+
+    @Column(nullable = false)
+    private String accountUser;
+
+    @Column(nullable = false)
+    private String accountNumber;
 
     @Column(nullable = false)
     private LocalDateTime startTime;
@@ -101,10 +110,13 @@ public class Sales extends BaseEntity {
 
     public void updateSales(Sales sales) {
         if (sales.getName() != null) this.name = sales.getName();
+        if (sales.getNamePrice() != null) this.namePrice = sales.getNamePrice();
         if (sales.getDescription() != null) this.description = sales.getDescription();
         if (sales.getSalesStatus() != null) this.salesStatus = sales.getSalesStatus();
         if (sales.getArtistSalesList() != null) this.artistSalesList = sales.getArtistSalesList();
         if (sales.getTeamSalesList() != null) this.teamSalesList = sales.getTeamSalesList();
-        if (sales.getAccount() != null) this.account = sales.getAccount();
+        if (sales.getAccountName() != null) this.accountName = sales.getAccountName();
+        if (sales.getAccountUser() != null) this.accountUser = sales.getAccountUser();
+        if (sales.getAccountNumber() != null) this.accountNumber = sales.getAccountNumber();
     }
 }

@@ -13,22 +13,27 @@ import java.util.List;
 @Setter
 @Builder
 public class WriteSalesDto {
-    @NotBlank(message="제목을 입력해주세요.")
+    @NotBlank(message = "제목을 입력해주세요.")
     private String name;
-
-    @NotBlank(message= "내용을 입력해주세요.")
+    @NotBlank(message = "내용을 입력해주세요.")
     private String description;
     private List<String> hashtag;
-    private String account;
+    private String accountName;
+    private String accountUser;
+    private String accountNumber;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private Integer namePrice;
 
 
-    public Sales toEntity(){
+    public Sales toEntity() {
         return Sales.builder()
                 .name(name)
+                .namePrice(namePrice)
                 .description(description)
-                .account(account)
+                .accountUser(accountUser)
+                .accountNumber(accountNumber)
+                .accountName(accountName)
                 .startTime(startTime)
                 .endTime(endTime)
                 .build();
