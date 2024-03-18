@@ -46,19 +46,19 @@ public class SalesInitService {
 
         Sales sales1 = createSales(seller, category1, "동방신기 티셔츠 팔아요.",
                 "동방신기 콘서트 티셔츠 굿즈, 거의 새 것...",
-                SalesStatus.ON_SALE, "1234567890",
+                SalesStatus.ON_SALE, "OO은행", "qwer", "123456789",
                 LocalDateTime.of(2023, 12, 24, 11, 00),
                 LocalDateTime.of(2024, 1, 31, 11, 00), imageUrl);
 
         Sales sales2 = createSales(seller, category1, "동방신기 티셔츠 팔아요.(판매 기간 종료)",
                 "동방신기 콘서트 티셔츠 굿즈, 거의 새 것...",
-                SalesStatus.ON_SALE, "1234567890",
+                SalesStatus.ON_SALE, "OO은행", "qwer", "123456789",
                 LocalDateTime.of(2023, 12, 24, 11, 00),
                 LocalDateTime.of(2023, 12, 31, 11, 00), imageUrl);
 
         Sales sales3 = createSales(seller, category2, "god 자켓 팔아요.",
                 "god 콘서트 자켓 굿즈, 거의 새 것...",
-                SalesStatus.ON_SALE, "1234567890",
+                SalesStatus.ON_SALE, "OO은행", "qwer", "123456789",
                 LocalDateTime.of(2023, 12, 14, 11, 00),
                 LocalDateTime.of(2023, 12, 25, 11, 00), imageUrl);
 
@@ -84,14 +84,16 @@ public class SalesInitService {
     }
 
     private Sales createSales(User seller, SalesCategory category, String title, String description,
-                              SalesStatus salesStatus, String account, LocalDateTime startTime, LocalDateTime endTime, String imageUrl) {
+                              SalesStatus salesStatus, String accountName, String accountUser, String accountNumber, LocalDateTime startTime, LocalDateTime endTime, String imageUrl) {
         return Sales.builder()
                 .users(seller)
                 .salesCategory(category)
                 .name(title)
                 .description(description)
                 .salesStatus(salesStatus)
-                .account(account)
+                .accountUser(accountUser)
+                .accountName(accountName)
+                .accountNumber(accountNumber)
                 .startTime(startTime)
                 .endTime(endTime)
                 .thumbnailImage(imageUrl)

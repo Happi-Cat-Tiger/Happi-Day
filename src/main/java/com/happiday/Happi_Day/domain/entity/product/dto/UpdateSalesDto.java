@@ -14,7 +14,9 @@ public class UpdateSalesDto {
     private String description;
     private List<String> hashtag;
     private String status;
-    private String account;
+    private String accountName;
+    private String accountUser;
+    private String accountNumber;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
@@ -22,7 +24,9 @@ public class UpdateSalesDto {
         return Sales.builder()
                 .name(name)
                 .description(description)
-                .account(account)
+                .accountUser(accountUser)
+                .accountName(accountName)
+                .accountNumber(accountNumber)
                 .startTime(startTime)
                 .endTime(endTime)
                 .build();

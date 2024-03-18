@@ -19,7 +19,9 @@ public class WriteSalesDto {
     @NotBlank(message= "내용을 입력해주세요.")
     private String description;
     private List<String> hashtag;
-    private String account;
+    private String accountName;
+    private String accountUser;
+    private String accountNumber;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
@@ -28,7 +30,9 @@ public class WriteSalesDto {
         return Sales.builder()
                 .name(name)
                 .description(description)
-                .account(account)
+                .accountUser(accountUser)
+                .accountNumber(accountNumber)
+                .accountName(accountName)
                 .startTime(startTime)
                 .endTime(endTime)
                 .build();

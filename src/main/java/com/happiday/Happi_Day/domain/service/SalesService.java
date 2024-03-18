@@ -76,7 +76,9 @@ public class SalesService {
                 .products(productList)
                 .salesLikes(new ArrayList<>())
                 .imageUrl(new ArrayList<>())
-                .account(dto.getAccount())
+                .accountName(dto.getAccountName())
+                .accountNumber(dto.getAccountNumber())
+                .accountUser(dto.getAccountUser())
                 .startTime(dto.getStartTime())
                 .endTime(dto.getEndTime())
                 .build();
@@ -234,7 +236,9 @@ public class SalesService {
                 .users(user)
                 .name(dto.getName())
                 .description(dto.getDescription())
-                .account(dto.getAccount())
+                .accountNumber(dto.getAccountNumber())
+                .accountName(dto.getAccountName())
+                .accountUser(dto.getAccountUser())
                 .startTime(dto.getStartTime())
                 .endTime(dto.getEndTime())
                 .build());
