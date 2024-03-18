@@ -55,8 +55,14 @@ public class Order extends BaseEntity {
     @Column
     private String depositor;
 
-    @Column
-    private String refundAccount;
+    @Column(nullable = false)
+    private String refundAccountName;
+
+    @Column(nullable = false)
+    private String refundAccountUser;
+
+    @Column(nullable = false)
+    private String refundAccountNumber;
 
     // orderedProduct 매핑
     @OneToMany(mappedBy = "order")

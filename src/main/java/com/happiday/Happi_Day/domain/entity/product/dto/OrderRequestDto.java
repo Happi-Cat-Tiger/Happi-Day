@@ -14,5 +14,7 @@ public class OrderRequestDto {
     private String address;
     private String delivery;
     private String depositor;
-    private String refundAccount;
+    private String refundAccountName;
+    private String refundAccountUser;
+    private String refundAccountNumber;
 }

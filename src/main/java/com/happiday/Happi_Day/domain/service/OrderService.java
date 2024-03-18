@@ -58,7 +58,9 @@ public class OrderService {
                 .orderedProducts(new ArrayList<>())
                 .delivery(delivery)
                 .depositor(orderRequest.getDepositor())
-                .refundAccount(orderRequest.getRefundAccount())
+                .refundAccountName(orderRequest.getRefundAccountName())
+                .refundAccountUser(orderRequest.getRefundAccountUser())
+                .refundAccountNumber(orderRequest.getRefundAccountNumber())
                 .build();
         orderRepository.save(newOrder);
 
@@ -79,7 +81,7 @@ public class OrderService {
         }
         newOrder.updateTotalPrice(price);
 
-        return "주문이 완료되었습니다.\n"+"입금 계좌 : "+sales.getAccount()+"\n예금주 : "+sales.getUsers().getRealname();
+        return "주문이 완료되었습니다.\n"+"입금 계좌 : "+sales.getAccountName()+" "+sales.getAccountNumber()+"\n예금주 : "+sales.getAccountUser();
     }
 
     // 주문 단일 상세 조회
