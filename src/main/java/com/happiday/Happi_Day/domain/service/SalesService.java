@@ -47,9 +47,10 @@ public class SalesService {
     private final RedisService redisService;
     private final SalesLikeRepository salesLikeRepository;
     private final SalesHashtagRepository salesHashtagRepository;
+    private final ProductService productService;
 
     @Transactional
-    public ReadOneSalesDto createSales(Long categoryId, WriteSalesDto dto, MultipartFile thumbnailImage, List<MultipartFile> imageFile, String username) {
+    public ReadOneSalesDto createSales(Long categoryId, WriteSalesDto salesDto, List<CreateProductDto> productDtos, MultipartFile thumbnailImage, List<MultipartFile> imageFile, String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
@@ -57,31 +58,34 @@ public class SalesService {
         SalesCategory category = salesCategoryRepository.findById(categoryId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
 
+        if (productDtos.isEmpty()) {
+            throw new CustomException(ErrorCode.PRODUCT_IS_EMPTY);
+        }
         List<Product> productList = new ArrayList<>();
 
-        if (dto.getEndTime().isBefore(dto.getStartTime())) throw new CustomException(ErrorCode.END_TIME_ERROR);
+        if (salesDto.getEndTime().isBefore(salesDto.getStartTime())) throw new CustomException(ErrorCode.END_TIME_ERROR);
 
         HashtagUtils hashtagUtils = new HashtagUtils(artistRepository, teamRepository, hashtagRepository);
-        Triple<List<Artist>, List<Team>, List<Hashtag>> processedTags = hashtagUtils.processTags(dto.getHashtag());
+        Triple<List<Artist>, List<Team>, List<Hashtag>> processedTags = hashtagUtils.processTags(salesDto.getHashtag());
 
         Sales newSales = Sales.builder()
                 .users(user)
                 .salesStatus(SalesStatus.ON_SALE)
                 .salesCategory(category)
-                .name(dto.getName())
-                .namePrice(dto.getNamePrice())
+                .name(salesDto.getName())
+                .namePrice(salesDto.getNamePrice())
                 .artistSalesList(new ArrayList<>())
                 .teamSalesList(new ArrayList<>())
                 .salesHashtags(new ArrayList<>())
-                .description(dto.getDescription())
+                .description(salesDto.getDescription())
                 .products(productList)
                 .salesLikes(new ArrayList<>())
                 .imageUrl(new ArrayList<>())
-                .accountName(dto.getAccountName())
-                .accountNumber(dto.getAccountNumber())
-                .accountUser(dto.getAccountUser())
-                .startTime(dto.getStartTime())
-                .endTime(dto.getEndTime())
+                .accountName(salesDto.getAccountName())
+                .accountNumber(salesDto.getAccountNumber())
+                .accountUser(salesDto.getAccountUser())
+                .startTime(salesDto.getStartTime())
+                .endTime(salesDto.getEndTime())
                 .build();
 
         // 아티스트와 판매글의 관계 설정
@@ -134,6 +138,13 @@ public class SalesService {
         }
 
         salesRepository.save(newSales);
+
+        // 상품 옵션 저장
+        for (CreateProductDto productDto: productDtos) {
+            productService.createProduct(newSales.getId(), productDto, user.getUsername());
+        }
+        salesRepository.save(newSales);
+
         ReadOneSalesDto.fromEntity(newSales, new ArrayList<>());
         return ReadOneSalesDto.fromEntity(newSales, new ArrayList<>());
     }
@@ -203,7 +214,7 @@ public class SalesService {
     }
 
     @Transactional
-    public ReadOneSalesDto updateSales(Long salesId, UpdateSalesDto dto, MultipartFile thumbnailImage, List<MultipartFile> imageFile, String username) {
+    public ReadOneSalesDto updateSales(Long salesId, UpdateSalesDto salesDto, List<CreateProductDto> productDtos, MultipartFile thumbnailImage, List<MultipartFile> imageFile, String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
@@ -213,10 +224,10 @@ public class SalesService {
         // user 확인
         if (!user.equals(sales.getUsers())) throw new CustomException(ErrorCode.FORBIDDEN);
 
-        if (dto.getEndTime().isBefore(dto.getStartTime())) throw new CustomException(ErrorCode.END_TIME_ERROR);
+        if (salesDto.getEndTime().isBefore(salesDto.getStartTime())) throw new CustomException(ErrorCode.END_TIME_ERROR);
 
         HashtagUtils hashtagUtils = new HashtagUtils(artistRepository, teamRepository, hashtagRepository);
-        Triple<List<Artist>, List<Team>, List<Hashtag>> processedTags = hashtagUtils.processTags(dto.getHashtag());
+        Triple<List<Artist>, List<Team>, List<Hashtag>> processedTags = hashtagUtils.processTags(salesDto.getHashtag());
 
         if (processedTags.getRight() != null) {
             salesHashtagRepository.deleteBySales(sales);
@@ -235,18 +246,15 @@ public class SalesService {
 
         sales.updateSales(Sales.builder()
                 .users(user)
-                .name(dto.getName())
-                .description(dto.getDescription())
-                .accountNumber(dto.getAccountNumber())
-                .accountName(dto.getAccountName())
-                .accountUser(dto.getAccountUser())
-                .startTime(dto.getStartTime())
-                .endTime(dto.getEndTime())
-                .namePrice(dto.getNamePrice())
+                .name(salesDto.getName())
+                .description(salesDto.getDescription())
+                .accountNumber(salesDto.getAccountNumber())
+                .accountName(salesDto.getAccountName())
+                .accountUser(salesDto.getAccountUser())
+                .startTime(salesDto.getStartTime())
+                .endTime(salesDto.getEndTime())
+                .namePrice(salesDto.getNamePrice())
                 .build());
-
-        log.info(dto.getNamePrice().toString());
-        log.info(sales.getNamePrice().toString());
 
         // 아티스트와 판매글의 관계 설정
         List<Artist> artists = processedTags.getLeft();
@@ -307,8 +315,8 @@ public class SalesService {
         }
 
 
-        if (dto.getStatus() != null) {
-            switch (dto.getStatus()) {
+        if (salesDto.getStatus() != null) {
+            switch (salesDto.getStatus()) {
                 case "판매중":
                     sales.updateStatus(SalesStatus.ON_SALE);
                     break;
@@ -323,6 +331,17 @@ public class SalesService {
             }
         }
 
+        salesRepository.save(sales);
+
+        // 상품 옵션 저장
+        for (CreateProductDto productDto: productDtos) {
+            Optional<Product> product = productRepository.findByNameAndSales(productDto.getName(), sales);
+            if(product.isPresent()){
+                productService.updateProduct(salesId, product.get().getId(), productDto, username);
+            }else{
+                productService.createProduct(salesId, productDto, username);
+            }
+        }
         salesRepository.save(sales);
 
         List<ReadProductDto> dtoList = new ArrayList<>();

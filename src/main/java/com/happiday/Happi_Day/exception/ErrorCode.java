@@ -84,6 +84,7 @@ public enum ErrorCode {
     // sales,
     SALES_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 판매글입니다."),
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 옵션입니다."),
+    PRODUCT_IS_EMPTY(HttpStatus.BAD_REQUEST, "상품을 한 개 이상 추가해주세요."),
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 주문입니다."),
     ORDER_FAILED(HttpStatus.BAD_REQUEST, "취소할 수 없는 주문입니다."),
     ORDER_CANT_DELETE(HttpStatus.UNAUTHORIZED, "삭제할 수 없는 주문입니다."),
