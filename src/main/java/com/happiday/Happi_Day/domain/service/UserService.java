@@ -186,6 +186,7 @@ public class UserService {
         String key = "code:" + dto.getUsername();
         stringRedisTemplate.opsForValue().set(key, code);
         stringRedisTemplate.expire(key, 600, TimeUnit.SECONDS);
+        log.info("key : " + key + " | createdCode : " + code + " | storedCode : " + stringRedisTemplate.opsForValue().get(key));
 
         return code;
     }

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,6 +36,9 @@ class UserServiceTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     @BeforeEach
     public void init() {
@@ -264,6 +268,9 @@ class UserServiceTest {
 
         // then
         Assertions.assertThat(result).isNotNull();
+
+        String key = "code:" + dto.getUsername();
+        Assertions.assertThat(redisTemplate.opsForValue().get(key)).isNotNull();
     }
 
     @Test
@@ -288,10 +295,13 @@ class UserServiceTest {
         UserNumDto dto2 = new UserNumDto("test@email.com", number);
 
         // when
-        Boolean result1 = userService.checkEmail(dto2);
+        Boolean result = userService.checkEmail(dto2);
 
         // then
-        Assertions.assertThat(result1).isTrue();
+        Assertions.assertThat(result).isTrue();
+
+        String key = "code:" + dto.getUsername();
+        Assertions.assertThat(redisTemplate.opsForValue().get(key)).isNotNull();
     }
 
     @Test
@@ -318,5 +328,9 @@ class UserServiceTest {
         // then
         Optional<User> user = userRepository.findByUsername("test@email.com");
         Assertions.assertThat(passwordEncoder.matches("test1234", user.get().getPassword())).isTrue();
+
+        String key = "code:" + dto.getUsername();
+        Assertions.assertThat(redisTemplate.opsForValue().get(key)).isNull();
+
     }
 }

@@ -5,11 +5,15 @@ import com.happiday.Happi_Day.domain.entity.user.RoleType;
 import com.happiday.Happi_Day.domain.entity.user.User;
 import com.happiday.Happi_Day.domain.entity.user.dto.UserFindDto;
 import com.happiday.Happi_Day.domain.entity.user.dto.UserLoginDto;
+import com.happiday.Happi_Day.domain.entity.user.dto.UserNumDto;
 import com.happiday.Happi_Day.domain.entity.user.dto.UserRegisterDto;
 import com.happiday.Happi_Day.domain.repository.UserRepository;
 import com.happiday.Happi_Day.utils.SecurityUtils;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,6 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -36,15 +41,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 class UserAuthControllerTest {
 
-    private static MockedStatic<SecurityUtils> securityUtilsMockedStatic;
     @Autowired
     private MockMvc mockMvc;
+
     @Autowired
     private UserRepository userRepository;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
+
     @Autowired
     private ObjectMapper objectMapper;
+
+    private static MockedStatic<SecurityUtils> securityUtilsMockedStatic;
+
     private User testUser;
 
     @BeforeAll
@@ -89,6 +99,9 @@ class UserAuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isCreated());
+
+        Optional<User> user = userRepository.findByUsername("user@email.com");
+        Assertions.assertThat(user.get().getRole()).isEqualTo(RoleType.USER);
     }
 
     @Test
@@ -221,7 +234,6 @@ class UserAuthControllerTest {
         mockMvc.perform(get("/api/v1/auth/logout"))
                 .andDo(print())
                 .andExpect(status().isOk());
-
     }
 
     @Test
@@ -240,10 +252,13 @@ class UserAuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isCreated());
+
+        Optional<User> user = userRepository.findByUsername("admin@email.com");
+        Assertions.assertThat(user.get().getRole()).isEqualTo(RoleType.ADMIN);
     }
 
     @Test
-    void 비밀번호찾기_성공() throws Exception {
+    void 본인인증후인증번호발송_성공() throws Exception {
         UserFindDto dto = new UserFindDto("김철수", "test@email.com");
 
         String body = objectMapper.writeValueAsString(dto);
@@ -256,24 +271,59 @@ class UserAuthControllerTest {
     }
 
     @Test
-    void 이메일확인_성공() throws Exception {
-//        UserFindDto dto1 = new UserFindDto("김철수", "test@email.com");
-//        String body1 = objectMapper.writeValueAsString(dto1);
-//        MvcResult result = mockMvc.perform(post("/api/v1/auth/find")
-//                        .content(body1)
-//                        .contentType(MediaType.APPLICATION_JSON))
-//                .andDo(print())
-//                .andExpect(status().isOk())
-//                .andReturn();
-//
-//        String response = result.getResponse().getContentAsString();
-//        UserNumDto dto2 = new UserNumDto("test@email.com", response);
-//        String body2 = objectMapper.writeValueAsString(dto2);
-//        mockMvc.perform(post("/api/v1/auth/check")
-//                        .content(body2)
-//                        .contentType(MediaType.APPLICATION_JSON))
-//                .andDo(print())
-//                .andExpect(status().isOk());
+    void 본인인증후인증번호발송_실패_입력값오류() throws Exception {
+        UserFindDto dto = new UserFindDto("김철", "test@email.com");
+
+        String body = objectMapper.writeValueAsString(dto);
+
+        MvcResult result = mockMvc.perform(post("/api/v1/auth/find")
+                        .content(body)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andReturn();
+    }
+
+    @Test
+    void 인증번호값일치확인_성공() throws Exception {
+        UserFindDto userFindDto = new UserFindDto("김철수", "test@email.com");
+        String userFindBody = objectMapper.writeValueAsString(userFindDto);
+        MvcResult result = mockMvc.perform(post("/api/v1/auth/find")
+                        .content(userFindBody)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String code = result.getResponse().getContentAsString();
+        UserNumDto dto = new UserNumDto("test@email.com", code);
+        String body = objectMapper.writeValueAsString(dto);
+        mockMvc.perform(post("/api/v1/auth/check")
+                        .content(body)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void 인증번호값일치확인_실패_입력오류() throws Exception {
+        UserFindDto userFindDto = new UserFindDto("김철수", "test@email.com");
+        String userFindBody = objectMapper.writeValueAsString(userFindDto);
+        MvcResult result = mockMvc.perform(post("/api/v1/auth/find")
+                        .content(userFindBody)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String code = result.getResponse().getContentAsString();
+        UserNumDto dto = new UserNumDto("test@email.com", code+"1");
+        String body = objectMapper.writeValueAsString(dto);
+        mockMvc.perform(post("/api/v1/auth/check")
+                        .content(body)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -286,5 +336,7 @@ class UserAuthControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk());
 
+        Optional<User> user = userRepository.findByUsername("test@email.com");
+        Assertions.assertThat(passwordEncoder.matches("newpassword", user.get().getPassword())).isTrue();
     }
 }
