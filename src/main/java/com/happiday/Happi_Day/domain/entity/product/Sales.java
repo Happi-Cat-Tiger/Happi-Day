@@ -40,6 +40,9 @@ public class Sales extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
+    private Integer namePrice;
+
     @Column(columnDefinition = "TEXT")
     private String description;
 
@@ -107,6 +110,7 @@ public class Sales extends BaseEntity {
 
     public void updateSales(Sales sales) {
         if (sales.getName() != null) this.name = sales.getName();
+        if (sales.getNamePrice() != null) this.namePrice = sales.getNamePrice();
         if (sales.getDescription() != null) this.description = sales.getDescription();
         if (sales.getSalesStatus() != null) this.salesStatus = sales.getSalesStatus();
         if (sales.getArtistSalesList() != null) this.artistSalesList = sales.getArtistSalesList();

@@ -19,10 +19,12 @@ public class UpdateSalesDto {
     private String accountNumber;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private Integer namePrice;
 
-    public Sales toEntity(){
+    public Sales toEntity() {
         return Sales.builder()
                 .name(name)
+                .namePrice(namePrice)
                 .description(description)
                 .accountUser(accountUser)
                 .accountName(accountName)

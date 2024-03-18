@@ -69,6 +69,7 @@ public class SalesService {
                 .salesStatus(SalesStatus.ON_SALE)
                 .salesCategory(category)
                 .name(dto.getName())
+                .namePrice(dto.getNamePrice())
                 .artistSalesList(new ArrayList<>())
                 .teamSalesList(new ArrayList<>())
                 .salesHashtags(new ArrayList<>())
@@ -241,7 +242,11 @@ public class SalesService {
                 .accountUser(dto.getAccountUser())
                 .startTime(dto.getStartTime())
                 .endTime(dto.getEndTime())
+                .namePrice(dto.getNamePrice())
                 .build());
+
+        log.info(dto.getNamePrice().toString());
+        log.info(sales.getNamePrice().toString());
 
         // 아티스트와 판매글의 관계 설정
         List<Artist> artists = processedTags.getLeft();

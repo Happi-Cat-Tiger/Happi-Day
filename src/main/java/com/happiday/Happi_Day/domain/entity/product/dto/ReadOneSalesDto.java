@@ -22,6 +22,7 @@ public class ReadOneSalesDto {
     private String salesCategory;
     private String user;
     private String name;
+    private Integer namePrice;
     private String description;
     private String salesStatus;
     private List<ReadProductDto> products;
@@ -38,7 +39,7 @@ public class ReadOneSalesDto {
     private LocalDateTime endTime;
     private int viewCount;
 
-    public static ReadOneSalesDto fromEntity(Sales sales, List<ReadProductDto> productList){
+    public static ReadOneSalesDto fromEntity(Sales sales, List<ReadProductDto> productList) {
 
         List<ReadDeliveryDto> deliveries = sales.getDeliveries() != null ? sales.getDeliveries().stream().map(ReadDeliveryDto::fromEntity).collect(Collectors.toList()) : Collections.emptyList();
 
@@ -47,6 +48,7 @@ public class ReadOneSalesDto {
                 .salesCategory(sales.getSalesCategory().getName())
                 .user(sales.getUsers().getNickname())
                 .name(sales.getName())
+                .namePrice(sales.getNamePrice())
                 .description(sales.getDescription())
                 .salesStatus(sales.getSalesStatus().getValue())
                 .products(productList)
