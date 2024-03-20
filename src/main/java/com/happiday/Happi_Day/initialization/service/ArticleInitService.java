@@ -33,7 +33,8 @@ public class ArticleInitService {
 
     public void initArticles() {
         User writer = userRepository.findById(2L).orElse(null);
-        BoardCategory category = boardCategoryRepository.findById(1L).orElse(null);
+        BoardCategory category1 = boardCategoryRepository.findById(1L).orElse(null);
+        BoardCategory category2 = boardCategoryRepository.findById(2L).orElse(null);
 //        Artist artist1 = artistRepository.findById(1L).orElse(null);
 //        Artist artist2 = artistRepository.findById(2L).orElse(null);
 //        Artist artist3 = artistRepository.findById(3L).orElse(null);
@@ -47,8 +48,8 @@ public class ArticleInitService {
         List<Long> teamForArticle1 = List.of(1L);
         List<Long> teamForArticle2 = List.of(2L);
 
-        Article article1 = createArticle(writer, "동방신기 제목", "동방신기 내용", category, imageUrl);
-        Article article2 = createArticle(writer, "god 제목", "god 내용", category, imageUrl);
+        Article article1 = createArticle(writer, "동방신기 제목", null, null, "동방신기 내용", category1, imageUrl);
+        Article article2 = createArticle(writer, "god 생일카페", "서울시 마포구 합정동", "OO카페", "god 내용", category2, imageUrl);
 
         List<Article> articles = List.of(article1, article2);
 
@@ -71,10 +72,12 @@ public class ArticleInitService {
         });
     }
 
-    private Article createArticle(User writer, String title, String content, BoardCategory category, String imageUrl) {
+    private Article createArticle(User writer, String title, String eventAddress, String eventDetailAddress, String content, BoardCategory category, String imageUrl) {
         return Article.builder()
                 .user(writer)
                 .title(title)
+                .eventAddress(eventAddress)
+                .eventDetailAddress(eventDetailAddress)
                 .content(content)
                 .category(category)
                 .thumbnailUrl(imageUrl)

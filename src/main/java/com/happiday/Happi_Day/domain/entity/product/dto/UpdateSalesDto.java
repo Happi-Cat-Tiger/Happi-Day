@@ -14,15 +14,21 @@ public class UpdateSalesDto {
     private String description;
     private List<String> hashtag;
     private String status;
-    private String account;
+    private String accountName;
+    private String accountUser;
+    private String accountNumber;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private Integer namePrice;
 
-    public Sales toEntity(){
+    public Sales toEntity() {
         return Sales.builder()
                 .name(name)
+                .namePrice(namePrice)
                 .description(description)
-                .account(account)
+                .accountUser(accountUser)
+                .accountName(accountName)
+                .accountNumber(accountNumber)
                 .startTime(startTime)
                 .endTime(endTime)
                 .build();

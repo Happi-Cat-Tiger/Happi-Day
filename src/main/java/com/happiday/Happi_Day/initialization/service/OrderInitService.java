@@ -62,6 +62,9 @@ public class OrderInitService {
                 .orderedAt(LocalDateTime.now())
                 .trackingNum("해피택배 123412341234")
                 .delivery(delivery)
+                .refundAccountName("OO은행")
+                .refundAccountNumber("123456789")
+                .refundAccountUser("qwer")
                 .orderedProducts(new ArrayList<>())
                 .build();
     }

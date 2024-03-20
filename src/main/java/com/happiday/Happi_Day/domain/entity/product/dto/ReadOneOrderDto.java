@@ -15,12 +15,16 @@ public class ReadOneOrderDto {
     private Long id;
     private Long salesId;
     private String salesName;
-    private String sellerAccount;
+    private String sellerAccountName;
+    private String sellerAccountUser;
+    private String sellerAccountNumber;
     private String username;
     private String userPhone;
     private String address;
     private String depositor;
-    private String refundAccount;
+    private String refundAccountName;
+    private String refundAccountUser;
+    private String refundAccountNumber;
     private String orderAt;
     private List<OrderedProductDto> orderedProducts;
     private Integer productPrice;
@@ -76,12 +80,16 @@ public class ReadOneOrderDto {
                 .id(order.getId())
                 .salesId(sales.getId())
                 .salesName(sales.getName())
-                .sellerAccount(sales.getAccount())
+                .sellerAccountName(sales.getAccountName())
+                .sellerAccountUser(sales.getAccountUser())
+                .sellerAccountNumber(sales.getAccountNumber())
                 .username(user.getNickname())
                 .userPhone(user.getPhone())
                 .address(order.getAddress())
                 .depositor(order.getDepositor())
-                .refundAccount(order.getRefundAccount())
+                .refundAccountName(order.getRefundAccountName())
+                .refundAccountUser(order.getRefundAccountUser())
+                .refundAccountNumber(order.getRefundAccountNumber())
                 .orderAt(order.getOrderedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .orderedProducts(productList)
                 .productPrice(order.getTotalPrice() - order.getDelivery().getPrice())
