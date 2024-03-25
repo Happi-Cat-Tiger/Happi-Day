@@ -69,7 +69,7 @@ public enum ErrorCode {
     CODE_NOT_MATCHED(HttpStatus.BAD_REQUEST, "코드가 일치하지 않습니다."),
     NICKNAME_CONFLICT(HttpStatus.CONFLICT, "중복된 닉네임입니다."),
     PHONE_CONFLICT(HttpStatus.CONFLICT, "중복된 전화번호입니다."),
-    PHONE_FORMAT_ERROR(HttpStatus.BAD_REQUEST, "전화번호 형식이 유효하지 않습니다. 000-0000-0000 형식으로 입력해주세요."),
+    PHONE_FORMAT_ERROR(HttpStatus.BAD_REQUEST, "전화번호 형식이 유효하지 않습니다. 11자리 숫자 형식으로 입력해주세요."),
     EMAIL_FORMAT_ERROR(HttpStatus.BAD_REQUEST, "이메일 형식이 유효하지 않습니다."),
 
     // chat
