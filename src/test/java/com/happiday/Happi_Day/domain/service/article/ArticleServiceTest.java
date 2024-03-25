@@ -1,4 +1,4 @@
-package com.happiday.Happi_Day.domain.service;
+package com.happiday.Happi_Day.domain.service.article;
 
 import com.happiday.Happi_Day.domain.entity.article.Article;
 import com.happiday.Happi_Day.domain.entity.article.ArticleLike;
@@ -11,8 +11,8 @@ import com.happiday.Happi_Day.domain.entity.board.BoardCategory;
 import com.happiday.Happi_Day.domain.entity.user.RoleType;
 import com.happiday.Happi_Day.domain.entity.user.User;
 import com.happiday.Happi_Day.domain.repository.*;
+import com.happiday.Happi_Day.domain.service.ArticleService;
 import jakarta.persistence.EntityManager;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -73,11 +73,6 @@ public class ArticleServiceTest {
     private List<MultipartFile> imageList;
     private Article testArticle;
     private Artist artist;
-
-    @AfterEach
-    void afterEach() {
-        articleRepository.deleteAll();
-    }
 
     @BeforeEach
     void beforeEach() {
@@ -146,7 +141,6 @@ public class ArticleServiceTest {
                 .articleLikes(new ArrayList<>())
                 .build();
         articleRepository.save(testArticle);
-
     }
 
     @Test
@@ -265,8 +259,6 @@ public class ArticleServiceTest {
         Page<ReadListArticleDto> articleList = articleService.readArticleBySubscribedArtists(pageable, testCategory.getId(), filter, keyword, testUser.getUsername());
 
         // then
-        System.out.println(testUser.getArtistSubscriptionList());
-
         assertThat(articleList).isNotNull();
         assertThat(articleList.getContent().size()).isEqualTo(1);
     }
