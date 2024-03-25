@@ -24,6 +24,7 @@ public class MailService {
 
     @Value("${spring.mail.from.address}")
     private String fromAddress;
+
     @Value("${spring.mail.from.name}")
     private String fromName;
 
@@ -34,10 +35,11 @@ public class MailService {
         return String.format("%06d", num);
     }
 
-    public void sendEmail(String to, String code) {
+    public String sendEmail(String to, String code) {
         MimeMessage message = createMessage(to, code);
         try {
             javaMailSender.send(message);
+            return to + "에게 " + code + "전송";
         } catch (MailException es) {
             log.info(es.getMessage());
             throw new CustomException(ErrorCode.MAIL_SEND_ERROR);
