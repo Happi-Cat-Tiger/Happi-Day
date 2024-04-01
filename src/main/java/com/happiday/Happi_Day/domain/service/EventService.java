@@ -211,21 +211,53 @@ public class EventService {
             event.setImageUrl(newImageUrl);
         }
 
-        HashtagUtils hashtagUtils = new HashtagUtils(artistRepository, teamRepository, hashtagRepository);
-        Triple<List<Artist>, List<Team>, List<Hashtag>> processedTags = hashtagUtils.processTags(request.getHashtags());
+        if (request.getHashtags() != null) {
+            HashtagUtils hashtagUtils = new HashtagUtils(artistRepository, teamRepository, hashtagRepository);
+            Triple<List<Artist>, List<Team>, List<Hashtag>> processedTags = hashtagUtils.processTags(request.getHashtags());
 
-        if (processedTags.getRight() != null) {
-            eventHashtagRepository.deleteByEvent(event);
-            event.getEventHashtags().clear();
+            if (processedTags.getRight() != null && !processedTags.getRight().isEmpty()) {
+                eventHashtagRepository.deleteByEvent(event);
+                event.getEventHashtags().clear();
 
-            List<Hashtag> hashtags = processedTags.getRight();
-            for (Hashtag hashtag : hashtags) {
-                EventHashtag eventHashtag = EventHashtag.builder()
-                        .event(event)
-                        .hashtag(hashtag)
-                        .build();
-                eventHashtagRepository.save(eventHashtag);
-                event.getEventHashtags().add(eventHashtag);
+                List<Hashtag> hashtags = processedTags.getRight();
+                for (Hashtag hashtag : hashtags) {
+                    EventHashtag eventHashtag = EventHashtag.builder()
+                            .event(event)
+                            .hashtag(hashtag)
+                            .build();
+                    eventHashtagRepository.save(eventHashtag);
+                    event.getEventHashtags().add(eventHashtag);
+                }
+
+                // 아티스트와 이벤트의 관계 설정
+                if (processedTags.getLeft() != null && !processedTags.getLeft().isEmpty()) {
+                    List<Artist> artists = processedTags.getLeft();
+                    artistEventRepository.deleteByEvent(event);
+                    event.getArtistsEventList().clear();
+                    for (Artist artist : artists) {
+                        ArtistEvent artistEvent = ArtistEvent.builder()
+                                .event(event)
+                                .artist(artist)
+                                .build();
+                        artistEventRepository.save(artistEvent);
+                        event.getArtistsEventList().add(artistEvent);
+                    }
+                }
+
+                // 팀과 이벤트의 관계 설정
+                if (processedTags.getMiddle() != null && !processedTags.getMiddle().isEmpty()) {
+                    List<Team> teams = processedTags.getMiddle();
+                    teamEventRepository.deleteByEvent(event);
+                    event.getTeamsEventList().clear();
+                    for (Team team : teams) {
+                        TeamEvent teamEvent = TeamEvent.builder()
+                                .event(event)
+                                .team(team)
+                                .build();
+                        teamEventRepository.save(teamEvent);
+                        event.getTeamsEventList().add(teamEvent);
+                    }
+                }
             }
         }
 
@@ -241,31 +273,6 @@ public class EventService {
 
         eventRepository.save(event);
 
-        // 아티스트와 이벤트의 관계 설정
-        List<Artist> artists = processedTags.getLeft();
-        artistEventRepository.deleteByEvent(event);
-        event.getArtistsEventList().clear();
-        for (Artist artist : artists) {
-            ArtistEvent artistEvent = ArtistEvent.builder()
-                    .event(event)
-                    .artist(artist)
-                    .build();
-            artistEventRepository.save(artistEvent);
-            event.getArtistsEventList().add(artistEvent);
-        }
-
-        // 팀과 이벤트의 관계 설정
-        List<Team> teams = processedTags.getMiddle();
-        teamEventRepository.deleteByEvent(event);
-        event.getTeamsEventList().clear();
-        for (Team team : teams) {
-            TeamEvent teamEvent = TeamEvent.builder()
-                    .event(event)
-                    .team(team)
-                    .build();
-            teamEventRepository.save(teamEvent);
-            event.getTeamsEventList().add(teamEvent);
-        }
 
         return EventResponseDto.fromEntity(event);
     }
