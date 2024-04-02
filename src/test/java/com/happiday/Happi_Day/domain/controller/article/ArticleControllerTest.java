@@ -40,7 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 public class ArticleControllerTest {
     @Autowired
-    private MockMvc mockMvc;
+    MockMvc mockMvc;
 
     @Autowired
     BoardCategoryRepository boardCategoryRepository;
@@ -55,16 +55,16 @@ public class ArticleControllerTest {
     ArticleRepository articleRepository;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    ObjectMapper objectMapper;
 
     @Autowired
-    private ArtistRepository artistRepository;
+    ArtistRepository artistRepository;
 
     @Autowired
-    private ArtistSubscriptionRepository artistSubscriptionRepository;
+    ArtistSubscriptionRepository artistSubscriptionRepository;
 
     @Autowired
-    private ArtistArticleRepository artistArticleRepository;
+    ArtistArticleRepository artistArticleRepository;
 
     private BoardCategory testCategory;
     private MultipartFile thumbnailImage;
