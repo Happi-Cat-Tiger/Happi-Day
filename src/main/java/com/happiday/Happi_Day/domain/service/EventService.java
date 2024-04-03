@@ -196,7 +196,7 @@ public class EventService {
                 .orElseThrow(() -> new CustomException(ErrorCode.EVENT_NOT_FOUND));
 
         if (!event.getUser().equals(user)) {
-                throw new CustomException(ErrorCode.FORBIDDEN);
+            throw new CustomException(ErrorCode.FORBIDDEN);
         }
 
 
@@ -261,7 +261,7 @@ public class EventService {
             }
         }
 
-            event.update(Event.builder()
+        event.update(Event.builder()
                 .user(user)
                 .title(request.getTitle())
                 .startTime(request.getStartTime())
@@ -336,7 +336,7 @@ public class EventService {
         // 진행 중인 이벤트
         boolean isOngoingEvent =
                 event.getStartTime().isBefore(LocalDateTime.now())
-                && event.getEndTime().isAfter(LocalDateTime.now());
+                        && event.getEndTime().isAfter(LocalDateTime.now());
 
         String response;
 
