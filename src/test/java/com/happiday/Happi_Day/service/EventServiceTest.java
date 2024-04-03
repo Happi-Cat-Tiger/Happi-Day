@@ -104,6 +104,7 @@ public class EventServiceTest {
 
     private MockMultipartFile eventImage1, eventImage2;
 
+    @Mock
     private Event event1;
 
 
@@ -375,6 +376,7 @@ public class EventServiceTest {
         String clientAddress = "0:0:0:0:0:0:0:1";
         Long eventId = 1L;
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(event1));
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event1));
         when(redisService.isFirstIpRequest(clientAddress, eventId)).thenReturn(true);
 
         EventResponseDto result = eventService.readEvent(clientAddress, eventId);
@@ -400,6 +402,7 @@ public class EventServiceTest {
 
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(event1));
         when(userRepository.findByUsername(user1.getUsername())).thenReturn(Optional.of(user1));
+
 
         EventResponseDto result = eventService.updateEvent(eventId, updateDto, updatedThumbnail, updatedImage, user1.getUsername());
 
