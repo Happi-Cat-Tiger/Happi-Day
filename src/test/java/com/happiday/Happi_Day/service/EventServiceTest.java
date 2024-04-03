@@ -120,41 +120,35 @@ public class EventServiceTest {
                 .isTermsAgreed(true)
                 .termsAt(LocalDateTime.now())
                 .build();
-        userRepository.save(user1);
 
         artist1 = Artist.builder()
                 .name("아이유")
                 .description("아이유입니다.")
                 .build();
-        artistRepository.save(artist1);
 
         artist2 = Artist.builder()
                 .name("김범수")
                 .description("김범수입니다.")
                 .build();
-        artistRepository.save(artist2);
 
 
         team1 = Team.builder()
                 .name("동방신기")
                 .description("동방신기입니다.")
                 .build();
-        teamRepository.save(team1);
 
         team2 = Team.builder()
                 .name("소녀시대")
                 .description("소녀시대입니다.")
                 .build();
-        teamRepository.save(team2);
+
         hashtag1 = Hashtag.builder()
                 .tag("동방신기포에버")
                 .build();
-        hashtagRepository.save(hashtag1);
 
         hashtag2 = Hashtag.builder()
                 .tag("소녀시대포에버")
                 .build();
-        hashtagRepository.save(hashtag2);
 
         eventImage1 = new MockMultipartFile(
                 "multipartFile1", "eventImage1.jpg", MediaType.IMAGE_JPEG_VALUE, "ImageData".getBytes());
@@ -172,26 +166,6 @@ public class EventServiceTest {
                 .imageUrl(String.valueOf(eventImage1))
                 .eventHashtags(new ArrayList<>())
                 .build();
-
-//        when(eventRepository.findById(anyLong())).thenReturn(Optional.of(event1));
-
-//        event1 = mock(Event.class);
-//        when(event1.getTitle()).thenReturn("제목");
-//        when(event1.getUser()).thenReturn(user1);
-//        when(event1.getStartTime()).thenReturn(LocalDateTime.now().minusMonths(1));
-//        when(event1.getEndTime()).thenReturn(LocalDateTime.now().plusMonths(3));
-//        when(event1.getDescription()).thenReturn("내용");
-//        when(event1.getAddress()).thenReturn("서울특별시 서초구 반포대로30길 32");
-//        when(event1.getLocation()).thenReturn("1층 카페 이로");
-//        when(event1.getImageUrl()).thenReturn(String.valueOf(eventImage1));
-
-
-//        when(event1.getEventHashtags()).thenReturn(new ArrayList<>());
-
-//        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user1));
-//        when(artistRepository.findByName(anyString())).thenReturn(Optional.of(artist1));
-//
-//        when(eventRepository.save(any(Event.class))).thenReturn(event1); // 이벤트 저장 시 mockEvent 반환
 
     }
 
@@ -508,25 +482,25 @@ public class EventServiceTest {
         verify(participationRepository).delete(existingParticipation);
     }
 
-    @Test
-    @DisplayName("이벤트 조회수 증가 성공 테스트")
-
-    public void increaseViewCountTest1() {
-        // ArgumentCaptor 인스턴스 생성
-        ArgumentCaptor<Long> eventIdCaptor = ArgumentCaptor.forClass(Long.class);
-        ArgumentCaptor<String> clientAddressCaptor = ArgumentCaptor.forClass(String.class);
-
-        // 테스트 실행
-        eventService.increaseViewCount("127.0.0.1", 1L);
-
-        // verify를 사용해 메서드가 호출되었는지 확인하고, ArgumentCaptor로 파라미터 값을 캡처
-        verify(eventRepository).increaseViewCount(eventIdCaptor.capture());
-        verify(redisService).clientRequest(clientAddressCaptor.capture(), eventIdCaptor.capture());
-
-        // 캡처된 파라미터 값이 예상한 값과 일치하는지 검증
-        assertEquals(Long.valueOf(1L), eventIdCaptor.getValue());
-        assertEquals("127.0.0.1", clientAddressCaptor.getValue());
-    }
+//    @Test
+//    @DisplayName("이벤트 조회수 증가 성공 테스트")
+//
+//    public void increaseViewCountTest1() {
+//        // ArgumentCaptor 인스턴스 생성
+//        ArgumentCaptor<Long> eventIdCaptor = ArgumentCaptor.forClass(Long.class);
+//        ArgumentCaptor<String> clientAddressCaptor = ArgumentCaptor.forClass(String.class);
+//
+//        // 테스트 실행
+//        eventService.increaseViewCount("127.0.0.1", 1L);
+//
+//        // verify를 사용해 메서드가 호출되었는지 확인하고, ArgumentCaptor로 파라미터 값을 캡처
+//        verify(eventRepository).increaseViewCount(eventIdCaptor.capture());
+//        verify(redisService).clientRequest(clientAddressCaptor.capture(), eventIdCaptor.capture());
+//
+//        // 캡처된 파라미터 값이 예상한 값과 일치하는지 검증
+//        assertEquals(Long.valueOf(1L), eventIdCaptor.getValue());
+//        assertEquals("127.0.0.1", clientAddressCaptor.getValue());
+//    }
 
     @Test
     @DisplayName("이벤트 조회수 증가 성공")
