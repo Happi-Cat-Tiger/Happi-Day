@@ -344,7 +344,7 @@ public class EventService {
             if (existingParticipation.isPresent()) {
                 // 이미 참가한 경우, 취소
                 participationRepository.delete(existingParticipation.get());
-                response = " cancel participation";
+                response = "cancel participation";
             } else {
                 // 참가하지 않은 경우, 참가
                 EventParticipation participateEvent = EventParticipation.builder()

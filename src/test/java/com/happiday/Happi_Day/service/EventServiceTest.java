@@ -434,7 +434,7 @@ public class EventServiceTest {
 
         String response = eventService.likeEvent(eventId, user1.getUsername());
 
-        assertTrue(response.contains("좋아요 성공"));
+        assertTrue(response.contains("like"));
         verify(likeRepository).save(any(EventLike.class));
     }
 
@@ -450,7 +450,7 @@ public class EventServiceTest {
 
         String response = eventService.likeEvent(eventId, user1.getUsername());
 
-        assertTrue(response.contains("좋아요 취소"));
+        assertTrue(response.contains("cancel like"));
         verify(likeRepository).delete(existingLike);
     }
 
@@ -465,7 +465,7 @@ public class EventServiceTest {
 
         String response = eventService.joinEvent(eventId, user1.getUsername());
 
-        assertTrue(response.contains("이벤트 참가"));
+        assertTrue(response.contains("participation"));
         verify(participationRepository).save(any(EventParticipation.class));
     }
 
@@ -481,7 +481,7 @@ public class EventServiceTest {
 
         String response = eventService.joinEvent(eventId, user1.getUsername());
 
-        assertTrue(response.contains("이벤트 참가 취소"));
+        assertTrue(response.contains("cancel participation"));
         verify(participationRepository).delete(existingParticipation);
     }
 
