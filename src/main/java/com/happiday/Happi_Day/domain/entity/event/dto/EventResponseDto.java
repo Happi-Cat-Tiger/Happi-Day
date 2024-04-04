@@ -10,7 +10,9 @@ import com.happiday.Happi_Day.domain.entity.team.TeamEvent;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Getter
@@ -58,7 +60,6 @@ public class EventResponseDto {
 
 
     public static EventResponseDto fromEntity(Event event) {
-
         return EventResponseDto.builder()
                 .id(event.getId())
                 .username(event.getUser().getNickname())
@@ -71,9 +72,24 @@ public class EventResponseDto {
                 .location(event.getLocation())
                 .thumbnailUrl(event.getThumbnailUrl())
                 .imageUrl(event.getImageUrl())
-                .artists(event.getArtistsEventList().stream().map(ArtistEvent::getArtist).map(Artist::getName).collect(Collectors.toList()))
-                .teams(event.getTeamsEventList().stream().map(TeamEvent::getTeam).map(Team::getName).collect(Collectors.toList()))
-                .hashtags(event.getEventHashtags().stream().map(EventHashtag::getHashtag).map(Hashtag::getTag).collect(Collectors.toList()))
+                .artists(Optional.ofNullable(event.getArtistsEventList())
+                        .map(list -> list.stream()
+                                .map(ArtistEvent::getArtist)
+                                .map(Artist::getName)
+                                .collect(Collectors.toList()))
+                        .orElse(Collections.emptyList()))
+                .teams(Optional.ofNullable(event.getTeamsEventList())
+                        .map(list -> list.stream()
+                                .map(TeamEvent::getTeam)
+                                .map(Team::getName)
+                                .collect(Collectors.toList()))
+                        .orElse(Collections.emptyList()))
+                .hashtags(Optional.ofNullable(event.getEventHashtags())
+                        .map(list -> list.stream()
+                                .map(EventHashtag::getHashtag)
+                                .map(Hashtag::getTag)
+                                .collect(Collectors.toList()))
+                        .orElse(Collections.emptyList()))
                 .commentCount(event.getCommentCount())
                 .joinCount(event.getJoinCount())
                 .likeCount(event.getLikeCount())

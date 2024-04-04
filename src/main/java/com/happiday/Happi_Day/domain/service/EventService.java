@@ -71,8 +71,6 @@ public class EventService {
 
         String imageUrl = fileUtils.uploadFile(imageFile);
 
-        // hashTag 처리
-        //get Left, Middle, Right가 각각 1, 2, 3번째 요소 반환
         HashtagUtils hashtagUtils = new HashtagUtils(artistRepository, teamRepository, hashtagRepository);
         Triple<List<Artist>, List<Team>, List<Hashtag>> processedTags = hashtagUtils.processTags(request.getHashtags());
 
@@ -198,7 +196,7 @@ public class EventService {
                 .orElseThrow(() -> new CustomException(ErrorCode.EVENT_NOT_FOUND));
 
         if (!event.getUser().equals(user)) {
-                throw new CustomException(ErrorCode.FORBIDDEN);
+            throw new CustomException(ErrorCode.FORBIDDEN);
         }
 
 
@@ -213,27 +211,57 @@ public class EventService {
             event.setImageUrl(newImageUrl);
         }
 
-        // hashTag 처리
-        //get Left, Middle, Right가 각각 1, 2, 3번째 요소 반환
-        HashtagUtils hashtagUtils = new HashtagUtils(artistRepository, teamRepository, hashtagRepository);
-        Triple<List<Artist>, List<Team>, List<Hashtag>> processedTags = hashtagUtils.processTags(request.getHashtags());
+        if (request.getHashtags() != null) {
+            HashtagUtils hashtagUtils = new HashtagUtils(artistRepository, teamRepository, hashtagRepository);
+            Triple<List<Artist>, List<Team>, List<Hashtag>> processedTags = hashtagUtils.processTags(request.getHashtags());
 
-        if (processedTags.getRight() != null) {
-            eventHashtagRepository.deleteByEvent(event);
-            event.getEventHashtags().clear();
+            if (processedTags.getRight() != null && !processedTags.getRight().isEmpty()) {
+                eventHashtagRepository.deleteByEvent(event);
+                event.getEventHashtags().clear();
 
-            List<Hashtag> hashtags = processedTags.getRight();
-            for (Hashtag hashtag : hashtags) {
-                EventHashtag eventHashtag = EventHashtag.builder()
-                        .event(event)
-                        .hashtag(hashtag)
-                        .build();
-                eventHashtagRepository.save(eventHashtag);
-                event.getEventHashtags().add(eventHashtag);
+                List<Hashtag> hashtags = processedTags.getRight();
+                for (Hashtag hashtag : hashtags) {
+                    EventHashtag eventHashtag = EventHashtag.builder()
+                            .event(event)
+                            .hashtag(hashtag)
+                            .build();
+                    eventHashtagRepository.save(eventHashtag);
+                    event.getEventHashtags().add(eventHashtag);
+                }
+
+                // 아티스트와 이벤트의 관계 설정
+                if (processedTags.getLeft() != null && !processedTags.getLeft().isEmpty()) {
+                    List<Artist> artists = processedTags.getLeft();
+                    artistEventRepository.deleteByEvent(event);
+                    event.getArtistsEventList().clear();
+                    for (Artist artist : artists) {
+                        ArtistEvent artistEvent = ArtistEvent.builder()
+                                .event(event)
+                                .artist(artist)
+                                .build();
+                        artistEventRepository.save(artistEvent);
+                        event.getArtistsEventList().add(artistEvent);
+                    }
+                }
+
+                // 팀과 이벤트의 관계 설정
+                if (processedTags.getMiddle() != null && !processedTags.getMiddle().isEmpty()) {
+                    List<Team> teams = processedTags.getMiddle();
+                    teamEventRepository.deleteByEvent(event);
+                    event.getTeamsEventList().clear();
+                    for (Team team : teams) {
+                        TeamEvent teamEvent = TeamEvent.builder()
+                                .event(event)
+                                .team(team)
+                                .build();
+                        teamEventRepository.save(teamEvent);
+                        event.getTeamsEventList().add(teamEvent);
+                    }
+                }
             }
         }
 
-            event.update(Event.builder()
+        event.update(Event.builder()
                 .user(user)
                 .title(request.getTitle())
                 .startTime(request.getStartTime())
@@ -245,31 +273,6 @@ public class EventService {
 
         eventRepository.save(event);
 
-        // 아티스트와 이벤트의 관계 설정
-        List<Artist> artists = processedTags.getLeft();
-        artistEventRepository.deleteByEvent(event);
-        event.getArtistsEventList().clear();
-        for (Artist artist : artists) {
-            ArtistEvent artistEvent = ArtistEvent.builder()
-                    .event(event)
-                    .artist(artist)
-                    .build();
-            artistEventRepository.save(artistEvent);
-            event.getArtistsEventList().add(artistEvent);
-        }
-
-        // 팀과 이벤트의 관계 설정
-        List<Team> teams = processedTags.getMiddle();
-        teamEventRepository.deleteByEvent(event);
-        event.getTeamsEventList().clear();
-        for (Team team : teams) {
-            TeamEvent teamEvent = TeamEvent.builder()
-                    .event(event)
-                    .team(team)
-                    .build();
-            teamEventRepository.save(teamEvent);
-            event.getTeamsEventList().add(teamEvent);
-        }
 
         return EventResponseDto.fromEntity(event);
     }
@@ -304,7 +307,7 @@ public class EventService {
         if (existingLike.isPresent()) {
             // 이미 좋아요를 한 경우, 좋아요 취소
             likeRepository.delete(existingLike.get());
-            response = "좋아요 취소";
+            response = "cancel like";
         } else {
             EventLike likeEvent = EventLike.builder()
                     .user(user)
@@ -312,10 +315,10 @@ public class EventService {
                     .build();
             likeRepository.save(likeEvent);
 
-            response = "좋아요 성공";
+            response = "like";
         }
         long likeCount = likeRepository.countByEvent(event);
-        return response + " / 좋아요 개수 : " + likeCount;
+        return response + " / likecount : " + likeCount;
     }
 
     @Transactional
@@ -333,7 +336,7 @@ public class EventService {
         // 진행 중인 이벤트
         boolean isOngoingEvent =
                 event.getStartTime().isBefore(LocalDateTime.now())
-                && event.getEndTime().isAfter(LocalDateTime.now());
+                        && event.getEndTime().isAfter(LocalDateTime.now());
 
         String response;
 
@@ -341,7 +344,7 @@ public class EventService {
             if (existingParticipation.isPresent()) {
                 // 이미 참가한 경우, 취소
                 participationRepository.delete(existingParticipation.get());
-                response = " 이벤트 참가 취소";
+                response = "cancel participation";
             } else {
                 // 참가하지 않은 경우, 참가
                 EventParticipation participateEvent = EventParticipation.builder()
@@ -349,7 +352,7 @@ public class EventService {
                         .event(event)
                         .build();
                 participationRepository.save(participateEvent);
-                response = " 이벤트 참가";
+                response = "participation";
             }
         } else {
             throw new CustomException(ErrorCode.EVENT_NOT_ONGOING);
