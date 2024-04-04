@@ -307,7 +307,7 @@ public class EventService {
         if (existingLike.isPresent()) {
             // 이미 좋아요를 한 경우, 좋아요 취소
             likeRepository.delete(existingLike.get());
-            response = "좋아요 취소";
+            response = "cancel like";
         } else {
             EventLike likeEvent = EventLike.builder()
                     .user(user)
@@ -315,10 +315,10 @@ public class EventService {
                     .build();
             likeRepository.save(likeEvent);
 
-            response = "좋아요 성공";
+            response = "like";
         }
         long likeCount = likeRepository.countByEvent(event);
-        return response + " / 좋아요 개수 : " + likeCount;
+        return response + " / likecount : " + likeCount;
     }
 
     @Transactional
@@ -344,7 +344,7 @@ public class EventService {
             if (existingParticipation.isPresent()) {
                 // 이미 참가한 경우, 취소
                 participationRepository.delete(existingParticipation.get());
-                response = " 이벤트 참가 취소";
+                response = " cancel participation";
             } else {
                 // 참가하지 않은 경우, 참가
                 EventParticipation participateEvent = EventParticipation.builder()
@@ -352,7 +352,7 @@ public class EventService {
                         .event(event)
                         .build();
                 participationRepository.save(participateEvent);
-                response = " 이벤트 참가";
+                response = "participation";
             }
         } else {
             throw new CustomException(ErrorCode.EVENT_NOT_ONGOING);
