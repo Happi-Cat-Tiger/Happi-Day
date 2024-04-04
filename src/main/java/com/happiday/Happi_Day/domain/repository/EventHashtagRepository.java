@@ -5,8 +5,12 @@ import com.happiday.Happi_Day.domain.entity.event.Event;
 import com.happiday.Happi_Day.domain.entity.event.EventHashtag;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface EventHashtagRepository extends JpaRepository<EventHashtag, Long> {
     void deleteByEvent(Event event);
+
+    List<EventHashtag> findAllByEvent(Event savedEvent);
 }
