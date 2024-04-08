@@ -30,6 +30,7 @@ public class ReadOneSalesDto {
     private List<String> teams;
     private List<String> hashtags;
     private int likeNum;
+    private String thumbnailImage;
     private List<String> imageList;
     private String accountName;
     private String accountUser;
@@ -53,6 +54,7 @@ public class ReadOneSalesDto {
                 .salesStatus(sales.getSalesStatus().getValue())
                 .products(productList)
                 .likeNum(sales.getSalesLikes().size())
+                .thumbnailImage(sales.getThumbnailImage())
                 .imageList(sales.getImageUrl())
                 .artists(sales.getArtistSalesList().stream().map(ArtistSales::getArtist).map(Artist::getName).collect(Collectors.toList()))
                 .teams(sales.getTeamSalesList().stream().map(TeamSales::getTeam).map(Team::getName).collect(Collectors.toList()))
