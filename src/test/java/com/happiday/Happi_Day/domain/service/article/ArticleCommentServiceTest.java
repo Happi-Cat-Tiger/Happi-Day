@@ -2,12 +2,15 @@ package com.happiday.Happi_Day.domain.service.article;
 
 import com.happiday.Happi_Day.domain.entity.article.Article;
 import com.happiday.Happi_Day.domain.entity.article.ArticleComment;
+import com.happiday.Happi_Day.domain.entity.article.dto.ReadListCommentDto;
 import com.happiday.Happi_Day.domain.entity.article.dto.WriteCommentDto;
 import com.happiday.Happi_Day.domain.entity.board.BoardCategory;
 import com.happiday.Happi_Day.domain.entity.user.RoleType;
 import com.happiday.Happi_Day.domain.entity.user.User;
 import com.happiday.Happi_Day.domain.repository.*;
 import com.happiday.Happi_Day.domain.service.ArticleCommentService;
+import com.happiday.Happi_Day.domain.service.MyPageService;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,6 +25,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,6 +50,9 @@ public class ArticleCommentServiceTest {
 
     @Autowired
     ArticleCommentRepository articleCommentRepository;
+
+    @Autowired
+    MyPageService myPageService;
 
 
     private User testUser;
@@ -168,5 +175,36 @@ public class ArticleCommentServiceTest {
         // then
         List<ArticleComment> commentList = articleCommentRepository.findAllByArticle(testArticle);
         assertThat(commentList.size()).isEqualTo(0);
+    }
+
+    @Test
+    public void 내가쓴게시물댓글조회() {
+        // given
+        Pageable pageable = PageRequest.of(0, 20);
+
+        User user = User.builder()
+                .username("user@email.com")
+                .password("password")
+                .nickname("테스트")
+                .realname("김철수")
+                .phone("01012341234")
+                .role(RoleType.USER)
+                .isTermsAgreed(true)
+                .termsAt(LocalDateTime.now())
+                .build();
+        userRepository.save(user);
+
+        WriteCommentDto dto = new WriteCommentDto();
+        dto.setContent("test comment");
+
+        articleCommentService.writeComment(testArticle.getId(), dto, user.getUsername());
+
+        // when
+        Page<ReadListCommentDto> result = myPageService.readMyArticleComments(user.getUsername(), pageable);
+
+        // then
+        Assertions.assertThat(result.getNumberOfElements()).isEqualTo(1);
+        Assertions.assertThat(result.getContent().get(0).getArticleId()).isEqualTo(testArticle.getId());
+        Assertions.assertThat(result.getContent().get(0).getNickname()).isEqualTo(user.getNickname());
     }
 }

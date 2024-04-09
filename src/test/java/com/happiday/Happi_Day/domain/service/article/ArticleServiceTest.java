@@ -12,7 +12,9 @@ import com.happiday.Happi_Day.domain.entity.user.RoleType;
 import com.happiday.Happi_Day.domain.entity.user.User;
 import com.happiday.Happi_Day.domain.repository.*;
 import com.happiday.Happi_Day.domain.service.ArticleService;
+import com.happiday.Happi_Day.domain.service.MyPageService;
 import jakarta.persistence.EntityManager;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,6 +29,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,6 +51,9 @@ public class ArticleServiceTest {
 
     @Autowired
     ArticleService articleService;
+
+    @Autowired
+    MyPageService myPageService;
 
     @Autowired
     ArticleRepository articleRepository;
@@ -328,5 +334,45 @@ public class ArticleServiceTest {
         // then
         Article updateArticle = articleRepository.findById(testArticle.getId()).get();
         assertThat(updateArticle.getViewCount()).isEqualTo(beforeIncrease + 1);
+    }
+
+    @Test
+    public void 내가쓴게시물조회() {
+        // given
+        Pageable pageable = PageRequest.of(0, 20);
+
+        // when
+        Page<ReadListArticleDto> result = myPageService.readMyArticles(testUser.getUsername(), pageable);
+
+        // then
+        Assertions.assertThat(result.getNumberOfElements()).isEqualTo(1);
+        Assertions.assertThat(result.getContent().get(0).getNickname()).isEqualTo(testUser.getNickname());
+    }
+
+    @Test
+    public void 내가좋아요한게시물조회() {
+        // given
+        Pageable pageable = PageRequest.of(0, 20);
+
+        User user = User.builder()
+                .username("user@email.com")
+                .password("password")
+                .nickname("테스트")
+                .realname("김철수")
+                .phone("01012341234")
+                .role(RoleType.USER)
+                .isTermsAgreed(true)
+                .termsAt(LocalDateTime.now())
+                .build();
+        userRepository.save(user);
+
+        articleService.likeArticle(testArticle.getId(), user.getUsername());
+
+        // when
+        Page<ReadListArticleDto> result = myPageService.readLikeArticles(user.getUsername(), pageable);
+
+        // then
+        Assertions.assertThat(result.getNumberOfElements()).isEqualTo(1);
+        Assertions.assertThat(result.getContent().get(0).getNickname()).isEqualTo(testUser.getNickname());
     }
 }
