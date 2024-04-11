@@ -76,10 +76,12 @@ public class Sales extends BaseEntity {
     private int viewCount;
 
     // 상품
+    @Setter
     @OneToMany(mappedBy = "sales")
     private List<Product> products = new ArrayList<>();
 
     // 배송방법
+    @Setter
     @OneToMany(mappedBy = "sales")
     private List<Delivery> deliveries = new ArrayList<>();
 
