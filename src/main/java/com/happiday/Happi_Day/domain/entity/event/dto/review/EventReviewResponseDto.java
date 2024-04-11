@@ -18,7 +18,7 @@ public class EventReviewResponseDto {
 
     private Long id;
 
-    private String username;
+    private String nickname;
 
     private String description;
 
@@ -34,7 +34,7 @@ public class EventReviewResponseDto {
 
         return EventReviewResponseDto.builder()
                 .id(review.getId())
-                .username(review.getUser().getNickname())
+                .nickname(review.getUser().getNickname())
                 .description(review.getDescription())
                 .rating(review.getRating())
                 .updatedAt(review.getUpdatedAt())
