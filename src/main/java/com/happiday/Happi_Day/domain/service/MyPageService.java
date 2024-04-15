@@ -2,6 +2,7 @@ package com.happiday.Happi_Day.domain.service;
 
 import com.happiday.Happi_Day.domain.entity.article.Article;
 import com.happiday.Happi_Day.domain.entity.article.ArticleComment;
+import com.happiday.Happi_Day.domain.entity.article.ArticleLike;
 import com.happiday.Happi_Day.domain.entity.article.dto.ReadListArticleDto;
 import com.happiday.Happi_Day.domain.entity.article.dto.ReadListCommentDto;
 import com.happiday.Happi_Day.domain.entity.event.*;
@@ -28,6 +29,7 @@ public class MyPageService {
 
     private final ArticleRepository articleRepository;
     private final ArticleCommentRepository articleCommentRepository;
+    private final ArticleLikeRepository articleLikeRepository;
     private final EventRepository eventRepository;
     private final EventCommentRepository eventCommentRepository;
     private final SalesRepository salesRepository;
@@ -53,10 +55,9 @@ public class MyPageService {
 
     public Page<ReadListArticleDto> readLikeArticles(String username, Pageable pageable) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-//        Page<Article> articles = articleRepository.findAllByLikeUsersContains(user, pageable);
-        Page<Article> articles = articleRepository.findAllByArticleLikesUserContains(user, pageable);
+        Page<ArticleLike> articleLikes = articleLikeRepository.findByUser(user, pageable);
 
-        return articles.map(ReadListArticleDto::fromEntity);
+        return articleLikes.map(articleLike -> ReadListArticleDto.fromEntity(articleLike.getArticle()));
     }
 
     public Page<EventListResponseDto> readMyEvents(String username, Pageable pageable) {
@@ -93,7 +94,7 @@ public class MyPageService {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Page<EventReview> reviews = reviewRepository.findAllByUser(user, pageable);
 
-        return  reviews.map(EventReviewResponseDto::fromEntity);
+        return reviews.map(EventReviewResponseDto::fromEntity);
     }
 
     public Page<ReadListSalesDto> readMySales(String username, Pageable pageable) {

@@ -254,58 +254,101 @@ class UserControllerTest {
         Assertions.assertThat(userRepository.existsByUsername("test@email.com")).isTrue();
     }
 
-//    @Test
-//    @DisplayName("마이페이지 - 내 게시물")
-//    void getMyArticles() {
-//    }
-//
-//    @Test
-//    @DisplayName("마이페이지 - 내 게시물 댓글")
-//    void getMyArticleComments() {
-//    }
-//
-//    @Test
-//    @DisplayName("마이페이지 - 좋아요한 게시물")
-//    void getLikeArticles() {
-//    }
-//
-//    @Test
-//    @DisplayName("마이페이지 - 내 이벤트")
-//    void getMyEvents() {
-//    }
-//
-//    @Test
-//    @DisplayName("마이페이지 - 내 이벤트 댓글")
-//    void getMyEventComments() {
-//    }
-//
-//    @Test
-//    @DisplayName("마이페이지 - 좋아요한 이벤트")
-//    void getLikeEvents() {
-//    }
-//
-//    @Test
-//    @DisplayName("마이페이지 - 참여한 이벤트")
-//    void getJoinEvents() {
-//    }
-//
-//    @Test
-//    @DisplayName("마이페이지 - 내 리뷰")
-//    void getMyReviews() {
-//    }
-//
+    @Test
+    @DisplayName("마이페이지 - 내 게시물")
+    void getMyArticles() throws Exception {
+        when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
+
+        mockMvc.perform(get("/api/v1/user/articles"))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("마이페이지 - 내 게시물 댓글")
+    void getMyArticleComments() throws Exception {
+        when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
+
+        mockMvc.perform(get("/api/v1/user/articles/comments"))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("마이페이지 - 좋아요한 게시물")
+    void getLikeArticles() throws Exception {
+        when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
+
+        mockMvc.perform(get("/api/v1/user/articles/like"))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("마이페이지 - 내 이벤트")
+    void getMyEvents() throws Exception {
+        when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
+
+        mockMvc.perform(get("/api/v1/user/events"))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("마이페이지 - 내 이벤트 댓글")
+    void getMyEventComments() throws Exception {
+        when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
+
+        mockMvc.perform(get("/api/v1/user/events/comments"))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("마이페이지 - 좋아요한 이벤트")
+    void getLikeEvents() throws Exception {
+        when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
+
+        mockMvc.perform(get("/api/v1/user/events/like"))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("마이페이지 - 참여한 이벤트")
+    void getJoinEvents() throws Exception {
+        when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
+
+        mockMvc.perform(get("/api/v1/user/events/join"))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("마이페이지 - 내 이벤트 리뷰")
+    void getMyReviews() throws Exception {
+        when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
+
+        mockMvc.perform(get("/api/v1/user/reviews"))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
 //    @Test
 //    @DisplayName("마이페이지 - 내 판매글")
 //    void getMySales() {
+//        when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
 //    }
 //
 //    @Test
 //    @DisplayName("마이페이지 - 좋아요한 판매글")
 //    void getLikeSales() {
+//        when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
 //    }
 //
 //    @Test
 //    @DisplayName("마이페이지 - 내 주문글")
 //    void getMyOrders() {
+//        when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
 //    }
 }
