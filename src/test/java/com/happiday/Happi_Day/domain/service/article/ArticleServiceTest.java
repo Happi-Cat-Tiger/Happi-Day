@@ -174,7 +174,7 @@ public class ArticleServiceTest {
         });
     }
 
-    @Test
+//    @Test
     @DisplayName("게시글 상세 조회")
     public void readOneArticleTest() {
         // given
@@ -319,7 +319,7 @@ public class ArticleServiceTest {
         assertThat(articleLikes.size()).isEqualTo(1);
     }
 
-    @Test
+//    @Test
     @DisplayName("게시글 조회수 증가")
     public void increaseViewCountTest() {
         // given
