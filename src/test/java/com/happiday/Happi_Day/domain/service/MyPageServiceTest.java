@@ -31,7 +31,7 @@ import java.util.ArrayList;
 @Transactional
 class MyPageServiceTest {
 
-    // Article 관련 MyPageService는 ArticleServiceTest, ArticleCommentService에 있
+    // Article 관련 MyPageService는 ArticleServiceTest, ArticleCommentService에 있음
 
     @Autowired
     MyPageService myPageService;
