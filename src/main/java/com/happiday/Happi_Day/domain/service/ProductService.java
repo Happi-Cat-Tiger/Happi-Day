@@ -38,26 +38,26 @@ public class ProductService {
         return ReadProductDto.fromEntity(newProduct);
     }
 
-    @Transactional
-    public ReadProductDto updateProduct(Long salesId, Long productId, CreateProductDto productDto, String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        Sales sales = salesRepository.findById(salesId)
-                .orElseThrow(() -> new CustomException(ErrorCode.SALES_NOT_FOUND));
-
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
-
-        if(!sales.getProducts().contains(product)) throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
-        // user 확인
-        if(!user.equals(sales.getUsers())) throw new CustomException(ErrorCode.FORBIDDEN);
-
-        product.update(productDto.toEntity());
-        productRepository.save(product);
-
-        return ReadProductDto.fromEntity(product);
-    }
+//    @Transactional
+//    public ReadProductDto updateProduct(Long salesId, Long productId, CreateProductDto productDto, String username) {
+//        User user = userRepository.findByUsername(username)
+//                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+//
+//        Sales sales = salesRepository.findById(salesId)
+//                .orElseThrow(() -> new CustomException(ErrorCode.SALES_NOT_FOUND));
+//
+//        Product product = productRepository.findById(productId)
+//                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+//
+//        if(!sales.getProducts().contains(product)) throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
+//        // user 확인
+//        if(!user.equals(sales.getUsers())) throw new CustomException(ErrorCode.FORBIDDEN);
+//
+//        product.update(productDto.toEntity());
+//        productRepository.save(product);
+//
+//        return ReadProductDto.fromEntity(product);
+//    }
 
 //    @Transactional
 //    public void deleteProduct(Long salesId, Long productId, String username) {
