@@ -9,6 +9,7 @@
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.Test;
 //import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.beans.factory.annotation.Value;
 //import org.springframework.boot.test.context.SpringBootTest;
 //import org.springframework.data.redis.core.StringRedisTemplate;
 //import org.springframework.data.redis.core.ValueOperations;
@@ -31,10 +32,13 @@
 //
 //    private User testUser;
 //
+//    @Value("${mail.address}")
+//    private String testEmail;
+//
 //    @BeforeEach
 //    public void init() {
 //        testUser = User.builder()
-//                .username("test@email.com")
+//                .username(testEmail)
 //                .password("qwer1234")
 //                .nickname("닉네임")
 //                .realname("테스트")
@@ -58,10 +62,10 @@
 //        ValueOperations<String, String> stringStringValueOperations = redisTemplate.opsForValue();
 //
 //        // when
-//        JwtTokenResponse response = tokenService.setToken("test@email.com");
+//        JwtTokenResponse response = tokenService.setToken(testEmail);
 //
 //        // then
-//        String savedCode = stringStringValueOperations.get("test@email.com");
+//        String savedCode = stringStringValueOperations.get(testEmail);
 //
 //        Assertions.assertThat(response.getAccessToken()).isNotNull();
 //        Assertions.assertThat(response.getRefreshToken()).isEqualTo(savedCode);
@@ -71,12 +75,12 @@
 //    void 로그아웃_성공시_redis_삭제() {
 //        // given
 //        ValueOperations<String, String> stringStringValueOperations = redisTemplate.opsForValue();
-//        JwtTokenResponse response = tokenService.setToken("test@email.com");
+//        JwtTokenResponse response = tokenService.setToken(testEmail);
 //
 //        // when
-//        tokenService.logout("test@email.com");
+//        tokenService.logout(testEmail);
 //
 //        // then
-//        Assertions.assertThat(stringStringValueOperations.get("test@email.com")).isNull();
+//        Assertions.assertThat(stringStringValueOperations.get(testEmail)).isNull();
 //    }
 //}

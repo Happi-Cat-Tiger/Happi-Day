@@ -9,6 +9,7 @@
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.Test;
 //import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.beans.factory.annotation.Value;
 //import org.springframework.boot.test.context.SpringBootTest;
 //import org.springframework.data.redis.core.StringRedisTemplate;
 //import org.springframework.http.MediaType;
@@ -40,10 +41,13 @@
 //    @Autowired
 //    private StringRedisTemplate redisTemplate;
 //
+//    @Value("${mail.address}")
+//    private String testEmail;
+//
 //    @BeforeEach
 //    public void init() {
 //        UserRegisterDto dto = new UserRegisterDto();
-//        dto.setUsername("test@email.com");
+//        dto.setUsername(testEmail);
 //        dto.setPassword("qwer1234");
 //        dto.setNickname("테스트");
 //        dto.setRealname("김철수");
@@ -105,7 +109,7 @@
 //    void 회원가입_실패_이메일중복() {
 //        // given
 //        UserRegisterDto dto = new UserRegisterDto();
-//        dto.setUsername("test@email.com");
+//        dto.setUsername(testEmail);
 //        dto.setPassword("qwer1234");
 //        dto.setNickname("닉네임");
 //        dto.setRealname("가나다");
@@ -159,10 +163,10 @@
 //                .build();
 //
 //        // when
-//        userService.updateUserProfile("test@email.com", dto);
+//        userService.updateUserProfile(testEmail, dto);
 //
 //        // then
-//        Optional<User> user = userRepository.findByUsername("test@email.com");
+//        Optional<User> user = userRepository.findByUsername(testEmail);
 //        Assertions.assertThat(dto.getNickname()).isEqualTo(user.get().getNickname());
 //        Assertions.assertThat(dto.getPhone()).isEqualTo(user.get().getPhone());
 //    }
@@ -177,7 +181,7 @@
 //                .build();
 //
 //        // when // then
-//        Assertions.assertThatThrownBy(() -> userService.updateUserProfile("test@email.com", dto))
+//        Assertions.assertThatThrownBy(() -> userService.updateUserProfile(testEmail, dto))
 //                .hasMessage(ErrorCode.NICKNAME_CONFLICT.getMessage());
 //    }
 //
@@ -191,7 +195,7 @@
 //                .build();
 //
 //        // when // then
-//        Assertions.assertThatThrownBy(() -> userService.updateUserProfile("test@email.com", dto))
+//        Assertions.assertThatThrownBy(() -> userService.updateUserProfile(testEmail, dto))
 //                .hasMessage(ErrorCode.PHONE_CONFLICT.getMessage());
 //    }
 //
@@ -205,7 +209,7 @@
 //                .build();
 //
 //        // when // then
-//        Assertions.assertThatThrownBy(() -> userService.updateUserProfile("test@email.com", dto))
+//        Assertions.assertThatThrownBy(() -> userService.updateUserProfile(testEmail, dto))
 //                .hasMessage(ErrorCode.PHONE_FORMAT_ERROR.getMessage());
 //    }
 //
@@ -217,7 +221,7 @@
 //        );
 //
 //        // when
-//        UserResponseDto result = userService.changeImage("test@email.com", file);
+//        UserResponseDto result = userService.changeImage(testEmail, file);
 //
 //        // then
 //        Assertions.assertThat(result.getImageUrl()).isNotNull();
@@ -229,7 +233,7 @@
 //        // given
 //
 //        // when
-//        UserResponseDto result = userService.resetImage("test@email.com");
+//        UserResponseDto result = userService.resetImage(testEmail);
 //
 //        // then
 //        Assertions.assertThat(result.getImageUrl()).isNotNull();
@@ -242,10 +246,10 @@
 //        UserPWDto dto = new UserPWDto("qwer1234");
 //
 //        // when
-//        userService.deleteUser("test@email.com", dto);
+//        userService.deleteUser(testEmail, dto);
 //
 //        // then
-//        Assertions.assertThat(userRepository.existsByUsername("test@email.com")).isFalse();
+//        Assertions.assertThat(userRepository.existsByUsername(testEmail)).isFalse();
 //    }
 //
 //    @Test
@@ -254,14 +258,14 @@
 //        UserPWDto dto = new UserPWDto("qwer12345");
 //
 //        // when // then
-//        Assertions.assertThatThrownBy(() -> userService.deleteUser("test@email.com", dto))
+//        Assertions.assertThatThrownBy(() -> userService.deleteUser(testEmail, dto))
 //                .hasMessage(ErrorCode.PASSWORD_NOT_MATCHED.getMessage());
 //    }
 //
 //    @Test
 //    void 비밀번호찾기_성공_본인인증_인증번호발송() {
 //        // given
-//        UserFindDto dto = new UserFindDto("김철수", "test@email.com");
+//        UserFindDto dto = new UserFindDto("김철수", testEmail);
 //
 //        // when
 //        String result = userService.findPassword(dto);
@@ -276,7 +280,7 @@
 //    @Test
 //    void 비밀번호찾기_실패_본인인증오류() {
 //        // given
-//        UserFindDto dto1 = new UserFindDto("김철", "test@email.com");
+//        UserFindDto dto1 = new UserFindDto("김철", testEmail);
 //        UserFindDto dto2 = new UserFindDto("김철수", "testt@email.com");
 //
 //        // when // then
@@ -289,10 +293,10 @@
 //    @Test
 //    void 비밀번호찾기_성공_인증번호입력() {
 //        // given
-//        UserFindDto dto = new UserFindDto("김철수", "test@email.com");
+//        UserFindDto dto = new UserFindDto("김철수", testEmail);
 //        String number = userService.findPassword(dto);
 //
-//        UserNumDto dto2 = new UserNumDto("test@email.com", number);
+//        UserNumDto dto2 = new UserNumDto(testEmail, number);
 //
 //        // when
 //        Boolean result = userService.checkEmail(dto2);
@@ -307,10 +311,10 @@
 //    @Test
 //    void 비밀번호찾기_실패_인증번호입력_오류() {
 //        // given
-//        UserFindDto dto = new UserFindDto("김철수", "test@email.com");
+//        UserFindDto dto = new UserFindDto("김철수", testEmail);
 //        String number = userService.findPassword(dto);
 //
-//        UserNumDto dto2 = new UserNumDto("test@email.com", "1111111");
+//        UserNumDto dto2 = new UserNumDto(testEmail, "1111111");
 //
 //        // when // then
 //        Assertions.assertThatThrownBy(() -> userService.checkEmail(dto2))
@@ -320,13 +324,13 @@
 //    @Test
 //    void 비밀번호찾기_성공_비밀번호변경() {
 //        // given
-//        UserLoginDto dto = new UserLoginDto("test@email.com", "test1234");
+//        UserLoginDto dto = new UserLoginDto(testEmail, "test1234");
 //
 //        // when
 //        userService.changePassword(dto);
 //
 //        // then
-//        Optional<User> user = userRepository.findByUsername("test@email.com");
+//        Optional<User> user = userRepository.findByUsername(testEmail);
 //        Assertions.assertThat(passwordEncoder.matches("test1234", user.get().getPassword())).isTrue();
 //
 //        String key = "code:" + dto.getUsername();
