@@ -93,15 +93,21 @@ public class UserService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 유효성 검사
-        checkValidPhone(dto.getPhone());
+        if (dto.getPhone() != null) {
+            checkValidPhone(dto.getPhone());
+        }
 
         // DB 확인
-        checkDuplicatedNickname(dto.getNickname());
-        checkDuplicatedPhone(dto.getPhone());
+        if (dto.getNickname() != null) {
+            checkDuplicatedNickname(dto.getNickname());
+        }
+        if (dto.getPhone() != null) {
+            checkDuplicatedPhone(dto.getPhone());
+        }
 
-        user.update(dto.toEntity(), passwordEncoder);
-
+        user.update(dto.toEntity(user), passwordEncoder);
         userRepository.save(user);
+
         return UserResponseDto.fromEntity(user);
     }
 

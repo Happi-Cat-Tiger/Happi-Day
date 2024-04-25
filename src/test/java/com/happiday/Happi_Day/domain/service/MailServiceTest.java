@@ -5,6 +5,7 @@ import jakarta.mail.internet.MimeMessage;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -16,6 +17,9 @@ class MailServiceTest {
 
     @Autowired
     private MailService mailService;
+
+    @Value("${mail.address}")
+    private String testEmail;
 
     @Test
     void 임의6자리숫자생성_성공() {
@@ -31,10 +35,10 @@ class MailServiceTest {
     @Test
     void 이메일전송_성공() {
         // given
-        MimeMessage message = mailService.createMessage("test@email.com", "123456");
+        MimeMessage message = mailService.createMessage(testEmail, "123456");
 
         // When
-        String result = mailService.sendEmail("test@email.com", "123456");
+        String result = mailService.sendEmail(testEmail, "123456");
 
         // Then
         Assertions.assertThat(result).isNotNull();
@@ -45,7 +49,7 @@ class MailServiceTest {
         // given
 
         // when
-        MimeMessage message = mailService.createMessage("test@email.com", "123456");
+        MimeMessage message = mailService.createMessage(testEmail, "123456");
 
         // then
         Assertions.assertThat(message.getSubject()).isEqualTo("HappiDay 이메일 인증 코드입니다.");
