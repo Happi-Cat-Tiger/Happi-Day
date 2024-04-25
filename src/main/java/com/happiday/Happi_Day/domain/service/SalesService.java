@@ -374,16 +374,16 @@ public class SalesService {
     }
 
     // 판매글 상태변경
-    @Transactional
-    public void updateStatus(Long salesId, String username, String status) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        Sales sales = salesRepository.findById(salesId)
-                .orElseThrow(() -> new CustomException(ErrorCode.SALES_NOT_FOUND));
-
-        if (!user.equals(sales.getUsers())) throw new CustomException(ErrorCode.FORBIDDEN);
-    }
+//    @Transactional
+//    public void updateStatus(Long salesId, String username, String status) {
+//        User user = userRepository.findByUsername(username)
+//                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+//
+//        Sales sales = salesRepository.findById(salesId)
+//                .orElseThrow(() -> new CustomException(ErrorCode.SALES_NOT_FOUND));
+//
+//        if (!user.equals(sales.getUsers())) throw new CustomException(ErrorCode.FORBIDDEN);
+//    }
 
     @Transactional
     public void deleteSales(Long categoryId, Long salesId, String username) {
