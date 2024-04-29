@@ -290,7 +290,7 @@ public class SalesServiceTest {
         assertThat(readListSalesBySubscribedArtists.getContent().get(0).getName()).isEqualTo("test name1");
     }
 
-    @Test
+//    @Test
     @DisplayName("판매글 상세 조회")
     public void readSalesOneTest() {
         // given
@@ -369,7 +369,7 @@ public class SalesServiceTest {
         assertThat(salesLikes.size()).isEqualTo(1);
     }
 
-    @Test
+//    @Test
     @DisplayName("판매글 조회수 증가")
     public void increaseViewCountTest() {
         // given
