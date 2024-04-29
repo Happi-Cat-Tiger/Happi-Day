@@ -121,4 +121,16 @@ public class Sales extends BaseEntity {
         if (sales.getAccountUser() != null) this.accountUser = sales.getAccountUser();
         if (sales.getAccountNumber() != null) this.accountNumber = sales.getAccountNumber();
     }
+
+    public void updateProducts(List<Product> products){
+        if(products != null) this.products = products;
+    }
+
+    public void updateHashtags(List<SalesHashtag> salesHashtags){
+        if(salesHashtags != null) this.salesHashtags = salesHashtags;
+    }
+
+    public void updateDelivery(List<Delivery> deliveries){
+        if(deliveries != null) this.deliveries = deliveries;
+    }
 }

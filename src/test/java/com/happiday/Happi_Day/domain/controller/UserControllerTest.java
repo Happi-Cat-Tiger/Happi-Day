@@ -12,6 +12,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
@@ -57,6 +58,9 @@ class UserControllerTest {
 
     private User testUser;
 
+    @Value("${mail.address}")
+    private String testEmail;
+
     @BeforeAll
     public static void beforeAll() {
         securityUtilsMockedStatic = mockStatic(SecurityUtils.class);
@@ -70,7 +74,7 @@ class UserControllerTest {
     @BeforeEach
     public void init() {
         this.testUser = User.builder()
-                .username("test@email.com")
+                .username(testEmail)
                 .password(passwordEncoder.encode("qwer1234"))
                 .nickname("테스트")
                 .realname("김철수")
@@ -110,7 +114,7 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk());
 
-        Optional<User> user = userRepository.findByUsername("test@email.com");
+        Optional<User> user = userRepository.findByUsername(testEmail);
 
         Assertions.assertThat(dto.getNickname()).isEqualTo(user.get().getNickname());
         Assertions.assertThat(dto.getPhone()).isEqualTo(user.get().getPhone());
@@ -134,7 +138,7 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isConflict());
 
-        Optional<User> user = userRepository.findByUsername("test@email.com");
+        Optional<User> user = userRepository.findByUsername(testEmail);
 
         Assertions.assertThat(dto.getPhone()).isNotEqualTo(user.get().getPhone());
     }
@@ -157,7 +161,7 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isConflict());
 
-        Optional<User> user = userRepository.findByUsername("test@email.com");
+        Optional<User> user = userRepository.findByUsername(testEmail);
 
         Assertions.assertThat(dto.getNickname()).isNotEqualTo(user.get().getNickname());
     }
@@ -180,7 +184,7 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest());
 
-        Optional<User> user = userRepository.findByUsername("test@email.com");
+        Optional<User> user = userRepository.findByUsername(testEmail);
 
         Assertions.assertThat(dto.getNickname()).isNotEqualTo(user.get().getNickname());
         Assertions.assertThat(dto.getPhone()).isNotEqualTo(user.get().getPhone());
@@ -200,7 +204,7 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk());
 
-        Optional<User> user = userRepository.findByUsername("test@email.com");
+        Optional<User> user = userRepository.findByUsername(testEmail);
 
         Assertions.assertThat(user.get().getImageUrl()).isNotNull();
         Assertions.assertThat(user.get().getImageUrl()).isNotEqualTo(defaultImageUtils.getDefaultImageUrlUserProfile());
@@ -214,7 +218,7 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk());
 
-        Optional<User> user = userRepository.findByUsername("test@email.com");
+        Optional<User> user = userRepository.findByUsername(testEmail);
 
         Assertions.assertThat(user.get().getImageUrl()).isNotNull();
         Assertions.assertThat(user.get().getImageUrl()).isEqualTo(defaultImageUtils.getDefaultImageUrlUserProfile());
@@ -234,7 +238,7 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk());
 
-        Assertions.assertThat(userRepository.existsByUsername("test@email.com")).isFalse();
+        Assertions.assertThat(userRepository.existsByUsername(testEmail)).isFalse();
     }
 
     @Test
@@ -251,7 +255,7 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
 
-        Assertions.assertThat(userRepository.existsByUsername("test@email.com")).isTrue();
+        Assertions.assertThat(userRepository.existsByUsername(testEmail)).isTrue();
     }
 
     @Test

@@ -15,11 +15,11 @@ public class UserUpdateDto {
     private String nickname;
     private String phone;
 
-    public User toEntity() {
+    public User toEntity(User exUser) {
         return User.builder()
-                .password(password)
-                .nickname(nickname)
-                .phone(phone)
+                .password(password != null ? password : exUser.getPassword())
+                .nickname(nickname != null ? nickname : exUser.getNickname())
+                .phone(phone != null ? phone : exUser.getPhone())
                 .build();
     }
 }

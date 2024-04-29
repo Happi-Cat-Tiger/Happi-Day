@@ -114,14 +114,14 @@ public class SalesController {
         return new ResponseEntity<>(responseSales, HttpStatus.OK);
     }
 
-    // 판매글 상태 변경
-    @PutMapping("/{salesId}/changeStatus")
-    public void updateStatus(
-            @PathVariable("salesId") Long salesId,
-            @RequestPart(name = "status") String status) {
-        String username = SecurityUtils.getCurrentUsername();
-        salesService.updateStatus(salesId, username, status);
-    }
+//    // 판매글 상태 변경
+//    @PutMapping("/{salesId}/changeStatus")
+//    public void updateStatus(
+//            @PathVariable("salesId") Long salesId,
+//            @RequestPart(name = "status") String status) {
+//        String username = SecurityUtils.getCurrentUsername();
+//        salesService.updateStatus(salesId, username, status);
+//    }
 
     // 판매글 삭제
     @DeleteMapping("/{categoryId}/{salesId}")

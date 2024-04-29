@@ -15,6 +15,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -58,10 +59,13 @@ class MyPageServiceTest {
 
     private Event testEvent;
 
+    @Value("${mail.address}")
+    private String testEmail;
+
     @BeforeEach
     public void init() {
         testUser = User.builder()
-                .username("test@email.com")
+                .username(testEmail)
                 .password("qwer1234")
                 .nickname("닉네임")
                 .realname("테스트")
