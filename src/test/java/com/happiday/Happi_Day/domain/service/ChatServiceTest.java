@@ -39,10 +39,10 @@ class ChatServiceTest {
     @Autowired
     private ChatMessageRepository chatMessageRepository;
 
-
-
     private User testUser1;
+
     private User testUser2;
+
     private ChatRoom chatRoom;
 
     @BeforeEach
