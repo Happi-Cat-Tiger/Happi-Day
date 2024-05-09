@@ -1,4 +1,4 @@
-package com.happiday.Happi_Day.domain.service;
+package com.happiday.Happi_Day.domain.service.chat;
 
 import com.happiday.Happi_Day.domain.entity.chat.ChatRoom;
 import com.happiday.Happi_Day.domain.entity.chat.dto.ChatRoomResponse;
@@ -7,6 +7,7 @@ import com.happiday.Happi_Day.domain.entity.user.User;
 import com.happiday.Happi_Day.domain.repository.ChatMessageRepository;
 import com.happiday.Happi_Day.domain.repository.ChatRoomRepository;
 import com.happiday.Happi_Day.domain.repository.UserRepository;
+import com.happiday.Happi_Day.domain.service.ChatRoomService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
