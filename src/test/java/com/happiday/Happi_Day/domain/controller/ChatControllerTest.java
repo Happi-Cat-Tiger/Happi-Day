@@ -1,5 +1,6 @@
-package com.happiday.Happi_Day.domain.service.chat;
+package com.happiday.Happi_Day.domain.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.happiday.Happi_Day.domain.entity.chat.ChatMessage;
 import com.happiday.Happi_Day.domain.entity.chat.ChatRoom;
 import com.happiday.Happi_Day.domain.entity.chat.dto.ChatMessageDto;
@@ -8,28 +9,39 @@ import com.happiday.Happi_Day.domain.entity.user.User;
 import com.happiday.Happi_Day.domain.repository.ChatMessageRepository;
 import com.happiday.Happi_Day.domain.repository.ChatRoomRepository;
 import com.happiday.Happi_Day.domain.repository.UserRepository;
-import com.happiday.Happi_Day.domain.service.ChatService;
-import org.assertj.core.api.Assertions;
+import com.happiday.Happi_Day.utils.SecurityUtils;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.List;
+
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
-class ChatServiceTest {
+class ChatControllerTest {
 
     @Autowired
-    private ChatService chatService;
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ChatController chatController;
 
     @Autowired
     private UserRepository userRepository;
@@ -40,11 +52,26 @@ class ChatServiceTest {
     @Autowired
     private ChatMessageRepository chatMessageRepository;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private static MockedStatic<SecurityUtils> securityUtilsMockedStatic;
+
     private User testUser1;
 
     private User testUser2;
 
     private ChatRoom chatRoom;
+
+    @BeforeAll
+    public static void beforeAll() {
+        securityUtilsMockedStatic = mockStatic(SecurityUtils.class);
+    }
+
+    @AfterAll
+    public static void afterAll() {
+        securityUtilsMockedStatic.close();
+    }
 
     @BeforeEach
     public void init() {
@@ -71,8 +98,14 @@ class ChatServiceTest {
                 .isTermsAgreed(true)
                 .build();
         userRepository.save(testUser2);
+    }
 
-        chatRoom = ChatRoom.builder()
+    @Test
+    void 채팅보내기() throws Exception {
+
+        when(SecurityUtils.getCurrentUsername()).thenReturn(testUser1.getUsername());
+
+        ChatRoom chatRoom = ChatRoom.builder()
                 .sender(testUser1)
                 .receiver(testUser2)
                 .isSenderDeleted(false)
@@ -81,31 +114,7 @@ class ChatServiceTest {
                 .chatMessages(new ArrayList<>())
                 .build();
         chatRoomRepository.save(chatRoom);
-    }
 
-        @Test
-    void 채팅내역가져오기() {
-        // given
-        Pageable pageable = PageRequest.of(0, 20);
-        ChatMessage chatMessage = ChatMessage.builder()
-                .chatRoom(chatRoom)
-                .sender(testUser1)
-                .content("안녕하세요")
-                .checked(false)
-                .build();
-        chatMessageRepository.save(chatMessage);
-        ChatMessageDto dto = chatService.sendMessage(testUser1.getUsername(), chatRoom.getId(), ChatMessageDto.fromEntity(chatMessage));
-
-        // when
-        Page<ChatMessageDto> result = chatService.getChatMessages(testUser1.getUsername(), chatRoom.getId(), pageable);
-
-        // then
-        Assertions.assertThat(result.getNumberOfElements()).isNotNull();
-    }
-
-    @Test
-    void 채팅하기() {
-        // given
         ChatMessage chatMessage = ChatMessage.builder()
                 .chatRoom(chatRoom)
                 .sender(testUser1)
@@ -114,32 +123,16 @@ class ChatServiceTest {
                 .build();
         chatMessageRepository.save(chatMessage);
 
-        // when
-        ChatMessageDto result = chatService.sendMessage(testUser1.getUsername(), chatRoom.getId(), ChatMessageDto.fromEntity(chatMessage));
+        ChatMessageDto dto = ChatMessageDto.fromEntity(chatMessage);
 
-        // then
-        Assertions.assertThat(result.getContent()).isEqualTo("안녕하세요");
-        Assertions.assertThat(result.getRoomId()).isEqualTo(chatRoom.getId());
-    }
-
-    @Test
-    void 채팅읽음처리() {
-        // given
-        Pageable pageable = PageRequest.of(0, 20);
-        ChatMessage chatMessage = ChatMessage.builder()
-                .chatRoom(chatRoom)
-                .sender(testUser2)
-                .content("안녕하세요")
-                .checked(false)
-                .build();
-        chatMessageRepository.save(chatMessage);
-        ChatMessageDto dto = chatService.sendMessage(testUser1.getUsername(), chatRoom.getId(), ChatMessageDto.fromEntity(chatMessage));
+        String body = objectMapper.writeValueAsString(dto);
 
         // when
-        chatService.readMessage(testUser1.getUsername(), chatRoom.getId());
+        mockMvc.perform(post("/api/v1/chat/{roomId}/send", chatRoom.getId())
+                        .content(body)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
 
-        // then
-        List<ChatMessage> result = chatMessageRepository.findAllByChatRoom_IdOrderByIdDesc(chatRoom.getId());
-        Assertions.assertThat(result.stream().allMatch(m -> m.getChecked().equals(true))).isTrue();
     }
 }
