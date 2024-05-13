@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -51,6 +52,10 @@ public class ChatRoomService {
             chatRoom = ChatRoom.builder()
                     .sender(sender)
                     .receiver(receiver)
+                    .isSenderDeleted(false)
+                    .isReceiverDeleted(false)
+                    .open(false)
+                    .chatMessages(new ArrayList<>())
                     .build();
         }
 
@@ -60,8 +65,8 @@ public class ChatRoomService {
 
     public List<ChatRoomResponse> findChatRooms(String username) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        List<ChatRoom> senderChatRooms = chatRoomRepository.findBySenderAndIsSenderDeletedFalse(user);
-        List<ChatRoom> receiverChatRooms = chatRoomRepository.findByReceiverAndIsReceiverDeletedFalse(user);
+        List<ChatRoom> senderChatRooms = chatRoomRepository.findAllBySenderAndIsSenderDeletedFalse(user);
+        List<ChatRoom> receiverChatRooms = chatRoomRepository.findAllByReceiverAndIsReceiverDeletedFalse(user);
         List<ChatRoom> chatRooms = Stream.concat(senderChatRooms.stream(), receiverChatRooms.stream())
                 .collect(Collectors.toList());
 
