@@ -189,7 +189,7 @@ public class EventControllerTest {
     @Test
     @DisplayName("이벤트 생성 API 테스트")
     void createEventTest() throws Exception {
-        // givne
+        // given
         MockMultipartFile eventRequest = new MockMultipartFile("event", "", MediaType.APPLICATION_JSON_VALUE, eventJsonRequest().getBytes());
 
         when(SecurityUtils.getCurrentUsername()).thenReturn(user1.getUsername());
@@ -267,9 +267,7 @@ public class EventControllerTest {
         mockResponseDtoList.add(eventListDto1);
         mockResponseDtoList.add(eventListDto2);
 
-        Page<EventListResponseDto> mockResponseDtoPage = new PageImpl<>(mockResponseDtoList);
-
-        return mockResponseDtoPage;
+        return new PageImpl<>(mockResponseDtoList);
     }
     @Test
     @DisplayName("이벤트 목록 조회 API 테스트")
