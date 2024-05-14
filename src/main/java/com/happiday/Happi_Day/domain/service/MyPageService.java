@@ -11,6 +11,7 @@ import com.happiday.Happi_Day.domain.entity.event.dto.comment.EventCommentListRe
 import com.happiday.Happi_Day.domain.entity.event.dto.review.EventReviewResponseDto;
 import com.happiday.Happi_Day.domain.entity.product.Order;
 import com.happiday.Happi_Day.domain.entity.product.Sales;
+import com.happiday.Happi_Day.domain.entity.product.SalesLike;
 import com.happiday.Happi_Day.domain.entity.product.dto.*;
 import com.happiday.Happi_Day.domain.entity.user.User;
 import com.happiday.Happi_Day.domain.repository.*;
@@ -33,6 +34,7 @@ public class MyPageService {
     private final EventRepository eventRepository;
     private final EventCommentRepository eventCommentRepository;
     private final SalesRepository salesRepository;
+    private final SalesLikeRepository salesLikeRepository;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final EventReviewRepository reviewRepository;
@@ -106,10 +108,10 @@ public class MyPageService {
 
     public Page<ReadListSalesDto> readLikeSales(String username, Pageable pageable) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-//        Page<Sales> orders = salesRepository.findAllBySalesLikesUsersContains(user, pageable);
-        Page<Sales> orders = salesRepository.findAllBySalesLikesUserContains(user, pageable);
 
-        return orders.map(ReadListSalesDto::fromEntity);
+        Page<SalesLike> salesLikes = salesLikeRepository.findByUser(user, pageable);
+
+        return salesLikes.map(salesLike -> ReadListSalesDto.fromEntity(salesLike.getSales()));
     }
 
     public Page<ReadListOrderDto> readMyOrders(String username, Pageable pageable) {

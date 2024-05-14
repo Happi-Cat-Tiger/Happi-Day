@@ -1,4 +1,4 @@
-package com.happiday.Happi_Day.domain.controller;
+package com.happiday.Happi_Day.domain.controller.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.happiday.Happi_Day.domain.entity.user.RoleType;

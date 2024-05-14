@@ -1,6 +1,7 @@
-package com.happiday.Happi_Day.domain.controller;
+package com.happiday.Happi_Day.domain.controller.chat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.happiday.Happi_Day.domain.controller.ChatController;
 import com.happiday.Happi_Day.domain.entity.chat.ChatMessage;
 import com.happiday.Happi_Day.domain.entity.chat.ChatRoom;
 import com.happiday.Happi_Day.domain.entity.chat.dto.ChatMessageDto;
