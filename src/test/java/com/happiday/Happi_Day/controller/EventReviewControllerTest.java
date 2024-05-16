@@ -163,7 +163,7 @@ public class EventReviewControllerTest {
 
         mockReviewResponseDto = EventReviewResponseDto.builder()
                 .id(1L)
-                .username(user1.getNickname())
+                .nickname(user1.getNickname())
                 .description("nice event")
                 .rating(5)
                 .updatedAt(LocalDateTime.now())
@@ -171,7 +171,7 @@ public class EventReviewControllerTest {
 
         mockUpdatedReviewResponseDto = EventReviewResponseDto.builder()
                 .id(1L)
-                .username(user1.getNickname())
+                .nickname(user1.getNickname())
                 .description("bad event")
                 .rating(3)
                 .updatedAt(LocalDateTime.now())
