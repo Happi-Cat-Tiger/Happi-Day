@@ -72,6 +72,6 @@ public class EventReviewController {
                                                 @PathVariable("reviewId") Long reviewId) {
         String username = SecurityUtils.getCurrentUsername();
         reviewService.deleteReview(eventId, reviewId, username);
-        return new ResponseEntity<>("삭제 완료.", HttpStatus.OK);
+        return new ResponseEntity<>("deleted done", HttpStatus.OK);
     }
 }

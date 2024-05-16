@@ -3,10 +3,8 @@ package com.happiday.Happi_Day.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.happiday.Happi_Day.domain.controller.EventController;
-import com.happiday.Happi_Day.domain.controller.UserController;
 import com.happiday.Happi_Day.domain.entity.article.Hashtag;
 import com.happiday.Happi_Day.domain.entity.artist.Artist;
-import com.happiday.Happi_Day.domain.entity.event.Event;
 import com.happiday.Happi_Day.domain.entity.event.dto.EventCreateDto;
 import com.happiday.Happi_Day.domain.entity.event.dto.EventListResponseDto;
 import com.happiday.Happi_Day.domain.entity.event.dto.EventResponseDto;
@@ -15,8 +13,6 @@ import com.happiday.Happi_Day.domain.entity.team.Team;
 import com.happiday.Happi_Day.domain.entity.user.RoleType;
 import com.happiday.Happi_Day.domain.entity.user.User;
 import com.happiday.Happi_Day.domain.service.EventService;
-import com.happiday.Happi_Day.jwt.JwtTokenFilter;
-import com.happiday.Happi_Day.jwt.JwtTokenUtils;
 import com.happiday.Happi_Day.utils.SecurityUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,19 +20,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,12 +34,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -189,7 +176,7 @@ public class EventControllerTest {
     @Test
     @DisplayName("이벤트 생성 API 테스트")
     void createEventTest() throws Exception {
-        // givne
+        // given
         MockMultipartFile eventRequest = new MockMultipartFile("event", "", MediaType.APPLICATION_JSON_VALUE, eventJsonRequest().getBytes());
 
         when(SecurityUtils.getCurrentUsername()).thenReturn(user1.getUsername());
@@ -267,9 +254,7 @@ public class EventControllerTest {
         mockResponseDtoList.add(eventListDto1);
         mockResponseDtoList.add(eventListDto2);
 
-        Page<EventListResponseDto> mockResponseDtoPage = new PageImpl<>(mockResponseDtoList);
-
-        return mockResponseDtoPage;
+        return new PageImpl<>(mockResponseDtoList);
     }
     @Test
     @DisplayName("이벤트 목록 조회 API 테스트")
