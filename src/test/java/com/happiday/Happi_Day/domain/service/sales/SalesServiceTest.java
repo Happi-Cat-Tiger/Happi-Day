@@ -9,8 +9,10 @@ import com.happiday.Happi_Day.domain.entity.product.dto.*;
 import com.happiday.Happi_Day.domain.entity.user.RoleType;
 import com.happiday.Happi_Day.domain.entity.user.User;
 import com.happiday.Happi_Day.domain.repository.*;
+import com.happiday.Happi_Day.domain.service.MyPageService;
 import com.happiday.Happi_Day.domain.service.SalesService;
 import jakarta.persistence.EntityManager;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -53,6 +55,9 @@ public class SalesServiceTest {
 
     @Autowired
     SalesService salesService;
+
+    @Autowired
+    MyPageService myPageService;
 
     @Autowired
     ArtistRepository artistRepository;
@@ -384,6 +389,48 @@ public class SalesServiceTest {
         // then
         Sales updateSales = salesRepository.findById(sales.getId()).get();
         assertThat(updateSales.getViewCount()).isEqualTo(beforeIncrease + 1);
+    }
+
+    @Test
+    public void 내가작성한판매글조회() {
+        // given
+        Pageable pageable = PageRequest.of(0, 20);
+
+        // when
+        Page<ReadListSalesDto> result = myPageService.readMySales(testUser.getUsername(), pageable);
+
+        // then
+        Assertions.assertThat(result.getNumberOfElements()).isEqualTo(1);
+        Assertions.assertThat(result.getContent().get(0).getUser()).isEqualTo(testUser.getNickname());
+    }
+
+    @Test
+    public void 내가좋아요한판매글조회() {
+        // given
+        Pageable pageable = PageRequest.of(0, 20);
+
+        User user = User.builder()
+                .username("user@email.com")
+                .password("password")
+                .nickname("테스트")
+                .realname("김철수")
+                .phone("01011111111")
+                .role(RoleType.USER)
+                .isTermsAgreed(true)
+                .termsAt(LocalDateTime.now())
+                .build();
+        userRepository.save(user);
+
+        salesService.likeSales(sales.getId(), user.getUsername());
+
+        // when
+        Page<ReadListSalesDto> result = myPageService.readLikeSales(user.getUsername(), pageable);
+
+        // then
+        Assertions.assertThat(result.getNumberOfElements()).isEqualTo(1);
+
+        List<SalesLike> salesLikes = salesLikeRepository.findBySales(sales);
+        Assertions.assertThat(salesLikes.size()).isEqualTo(1);
     }
 
 }

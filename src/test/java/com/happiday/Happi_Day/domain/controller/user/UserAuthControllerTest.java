@@ -1,4 +1,4 @@
-//package com.happiday.Happi_Day.domain.controller;
+//package com.happiday.Happi_Day.domain.controller.user;
 //
 //import com.fasterxml.jackson.databind.ObjectMapper;
 //import com.happiday.Happi_Day.domain.entity.user.RoleType;
@@ -342,5 +342,12 @@
 //
 //        Optional<User> user = userRepository.findByUsername(testEmail);
 //        Assertions.assertThat(passwordEncoder.matches("newpassword", user.get().getPassword())).isTrue();
+//    }
+//
+//    @Test
+//    void 이용약관() throws Exception {
+//        mockMvc.perform(get("/api/v1/auth/terms"))
+//                .andDo(print())
+//                .andExpect(status().isOk());
 //    }
 //}

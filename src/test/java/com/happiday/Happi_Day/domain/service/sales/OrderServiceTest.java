@@ -5,7 +5,9 @@ import com.happiday.Happi_Day.domain.entity.product.dto.*;
 import com.happiday.Happi_Day.domain.entity.user.RoleType;
 import com.happiday.Happi_Day.domain.entity.user.User;
 import com.happiday.Happi_Day.domain.repository.*;
+import com.happiday.Happi_Day.domain.service.MyPageService;
 import com.happiday.Happi_Day.domain.service.OrderService;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -50,6 +52,9 @@ public class OrderServiceTest {
 
     @Autowired
     OrderService orderService;
+
+    @Autowired
+    MyPageService myPageService;
 
     @Autowired
     DeliveryRepository deliveryRepository;
@@ -255,5 +260,18 @@ public class OrderServiceTest {
 
         // then
         assertThat(order.getOrderStatus()).isEqualTo(OrderStatus.DELIVERING);
+    }
+
+    @Test
+    public void 내가주문한내역조회() {
+        // given
+        Pageable pageable = PageRequest.of(0, 20);
+
+        // when
+        Page<ReadListOrderDto> result = myPageService.readMyOrders(testUser.getUsername(), pageable);
+
+        // then
+        Assertions.assertThat(result.getNumberOfElements()).isEqualTo(1);
+        Assertions.assertThat(result.getContent().get(0).getName()).isEqualTo(sales.getName());
     }
 }
