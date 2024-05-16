@@ -82,6 +82,7 @@ public class EventReviewService {
                         .eventReview(review)
                         .build();
                 reviewImages.add(reviewImage);
+                imageRepository.save(reviewImage);
             }
         }
 
@@ -143,8 +144,12 @@ public class EventReviewService {
                             .eventReview(review)
                             .build())
                     .collect(Collectors.toList());
-            review.setImages(reviewImages);
 
+            for (ReviewImage reviewImage : reviewImages) {
+                imageRepository.save(reviewImage);
+            }
+
+            review.setImages(reviewImages);
         }
 
         review.update(request.toEntity());
