@@ -2,11 +2,9 @@ package com.happiday.Happi_Day.controller;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.happiday.Happi_Day.domain.controller.EventCommentController;
 import com.happiday.Happi_Day.domain.controller.EventReviewController;
 import com.happiday.Happi_Day.domain.entity.article.Hashtag;
 import com.happiday.Happi_Day.domain.entity.artist.Artist;
-import com.happiday.Happi_Day.domain.entity.event.EventReview;
 import com.happiday.Happi_Day.domain.entity.event.dto.EventResponseDto;
 import com.happiday.Happi_Day.domain.entity.event.dto.comment.EventCommentResponseDto;
 import com.happiday.Happi_Day.domain.entity.event.dto.review.EventReviewCreateDto;
@@ -15,7 +13,6 @@ import com.happiday.Happi_Day.domain.entity.event.dto.review.EventReviewUpdateDt
 import com.happiday.Happi_Day.domain.entity.team.Team;
 import com.happiday.Happi_Day.domain.entity.user.RoleType;
 import com.happiday.Happi_Day.domain.entity.user.User;
-import com.happiday.Happi_Day.domain.service.EventCommentService;
 import com.happiday.Happi_Day.domain.service.EventReviewService;
 import com.happiday.Happi_Day.utils.SecurityUtils;
 import org.junit.jupiter.api.*;
@@ -30,10 +27,8 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -45,8 +40,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 
 @ExtendWith(MockitoExtension.class)

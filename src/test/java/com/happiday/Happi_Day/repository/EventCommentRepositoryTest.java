@@ -6,7 +6,6 @@ import com.happiday.Happi_Day.domain.entity.artist.ArtistEvent;
 import com.happiday.Happi_Day.domain.entity.artist.ArtistSubscription;
 import com.happiday.Happi_Day.domain.entity.event.Event;
 import com.happiday.Happi_Day.domain.entity.event.EventComment;
-import com.happiday.Happi_Day.domain.entity.event.EventHashtag;
 import com.happiday.Happi_Day.domain.entity.team.Team;
 import com.happiday.Happi_Day.domain.entity.team.TeamEvent;
 import com.happiday.Happi_Day.domain.entity.team.TeamSubscription;
@@ -29,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -86,13 +84,11 @@ public class EventCommentRepositoryTest {
 
     private Event event1;
 
-    private EventComment comment1;
+    private EventComment comment1, comment2;
 
 
     @BeforeEach
     void setUp() {
-
-        // 사용자 생성 및 저장
         user1 = User.builder()
                 .username("user1@email.com")
                 .password("qwe123")
@@ -165,7 +161,7 @@ public class EventCommentRepositoryTest {
                 .event(event1)
                 .content("eventComment test content 1")
                 .build();
-        EventComment comment2 = EventComment.builder()
+        comment2 = EventComment.builder()
                 .user(user1)
                 .event(event1)
                 .content("eventComment test content 2")

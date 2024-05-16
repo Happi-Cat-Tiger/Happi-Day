@@ -7,7 +7,6 @@ import com.happiday.Happi_Day.domain.entity.article.Hashtag;
 import com.happiday.Happi_Day.domain.entity.artist.Artist;
 import com.happiday.Happi_Day.domain.entity.event.dto.EventResponseDto;
 import com.happiday.Happi_Day.domain.entity.event.dto.comment.EventCommentCreateDto;
-import com.happiday.Happi_Day.domain.entity.event.dto.comment.EventCommentListResponseDto;
 import com.happiday.Happi_Day.domain.entity.event.dto.comment.EventCommentResponseDto;
 import com.happiday.Happi_Day.domain.entity.event.dto.comment.EventCommentUpdateDto;
 import com.happiday.Happi_Day.domain.entity.team.Team;
