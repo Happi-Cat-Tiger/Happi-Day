@@ -15,6 +15,8 @@ import com.happiday.Happi_Day.domain.entity.user.User;
 import com.happiday.Happi_Day.domain.repository.*;
 import com.happiday.Happi_Day.domain.service.EventService;
 import com.happiday.Happi_Day.domain.service.RedisService;
+import com.happiday.Happi_Day.exception.CustomException;
+import com.happiday.Happi_Day.exception.ErrorCode;
 import com.happiday.Happi_Day.utils.DefaultImageUtils;
 import com.happiday.Happi_Day.utils.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -171,7 +173,7 @@ public class EventServiceTest {
     }
 
     @Test
-    @DisplayName("이벤트 작성 성공")
+    @DisplayName("이벤트 작성 성공 테스트")
     void createEventSuccessTest() {
         List<String> hashtagRequestList = Arrays.asList("해시태그1", "소녀시대", "아이유");
 
@@ -198,7 +200,7 @@ public class EventServiceTest {
     }
 
     @Test
-    @DisplayName("기본 썸네일 이벤트 작성 성공")
+    @DisplayName("기본 썸네일 이벤트 작성 테스트")
     void createDefaultThumbnailEventSuccessTest() {
         List<String> hashtagRequestList = Arrays.asList("해시태그1", "소녀시대", "아이유");
 
@@ -226,7 +228,7 @@ public class EventServiceTest {
     }
 
     @Test
-    @DisplayName("이벤트 리스트 조회")
+    @DisplayName("이벤트 리스트 조회 테스트")
     void readEventsTest() {
         int totalEvents = 15;
 
@@ -256,7 +258,7 @@ public class EventServiceTest {
     }
 
     @Test
-    @DisplayName("페이지별 이벤트 목록 조회")
+    @DisplayName("페이지별 이벤트 목록 조회 테스트")
     void readEventsPerPageTest() {
         int totalEvents = 12;
 
@@ -293,7 +295,7 @@ public class EventServiceTest {
     }
 
     @Test
-    @DisplayName("진행중인 이벤트 리스트 조회")
+    @DisplayName("진행중인 이벤트 리스트 조회 테스트")
     void readOngoingEventsTest() {
         int totalEvents = 12;
 
@@ -318,7 +320,7 @@ public class EventServiceTest {
     }
 
     @Test
-    @DisplayName("구독한 아티스트의 이벤트 리스트 조회")
+    @DisplayName("구독한 아티스트의 이벤트 리스트 조회 테스트")
     void readEventsBySubscribedArtistsTest() {
         int totalEvents = 12;
 
@@ -345,7 +347,7 @@ public class EventServiceTest {
     }
 
     @Test
-    @DisplayName("구독한 아티스트의 진행중인 이벤트 리스트 조회")
+    @DisplayName("구독한 아티스트의 진행중인 이벤트 리스트 조회 테스트")
     void readOngoingEventsBySubscribedArtistsTest() {
         int totalEvents = 12;
 
@@ -371,7 +373,7 @@ public class EventServiceTest {
     }
 
     @Test
-    @DisplayName("이벤트 상세 조회")
+    @DisplayName("이벤트 상세 조회 테스트")
     void readEventSuccessTest() {
         String clientAddress = "0:0:0:0:0:0:0:1";
         Long eventId = 1L;
@@ -389,7 +391,7 @@ public class EventServiceTest {
     }
 
     @Test
-    @DisplayName("이벤트 수정 성공")
+    @DisplayName("이벤트 수정 테스트")
     void updateEventSuccessTest() {
         Long eventId = event1.getId();
         EventUpdateDto updateDto = EventUpdateDto.builder()
@@ -411,7 +413,7 @@ public class EventServiceTest {
         verify(eventRepository).save(any(Event.class));
     }
     @Test
-    @DisplayName("이벤트 삭제 성공")
+    @DisplayName("이벤트 삭제 테스트")
     void deleteEventSuccessTest() {
         Long eventId = 1L;
 
@@ -424,7 +426,7 @@ public class EventServiceTest {
     }
 
     @Test
-    @DisplayName("이벤트 좋아요 성공")
+    @DisplayName("이벤트 좋아요 성공 테스트")
     void likeEventSuccessTest() {
         Long eventId = 1L;
 
@@ -439,7 +441,7 @@ public class EventServiceTest {
     }
 
     @Test
-    @DisplayName("이벤트 좋아요 취소 성공")
+    @DisplayName("이벤트 좋아요 취소 테스트")
     void cancelLikeEventTest() {
         Long eventId = 1L;
         EventLike existingLike = EventLike.builder().user(user1).event(event1).build();
@@ -455,7 +457,7 @@ public class EventServiceTest {
     }
 
     @Test
-    @DisplayName("이벤트 참여 성공")
+    @DisplayName("이벤트 참여 성공 테스트")
     void joinEventSuccessTest() {
         Long eventId = 1L;
 
@@ -470,7 +472,7 @@ public class EventServiceTest {
     }
 
     @Test
-    @DisplayName("이벤트 참여 취소 성공")
+    @DisplayName("이벤트 참여 취소 테스트")
     void cancelJoinEventTest() {
         Long eventId = 1L;
         EventParticipation existingParticipation = EventParticipation.builder().user(user1).event(event1).build();
@@ -485,28 +487,8 @@ public class EventServiceTest {
         verify(participationRepository).delete(existingParticipation);
     }
 
-//    @Test
-//    @DisplayName("이벤트 조회수 증가 성공 테스트")
-//
-//    public void increaseViewCountTest1() {
-//        // ArgumentCaptor 인스턴스 생성
-//        ArgumentCaptor<Long> eventIdCaptor = ArgumentCaptor.forClass(Long.class);
-//        ArgumentCaptor<String> clientAddressCaptor = ArgumentCaptor.forClass(String.class);
-//
-//        // 테스트 실행
-//        eventService.increaseViewCount("127.0.0.1", 1L);
-//
-//        // verify를 사용해 메서드가 호출되었는지 확인하고, ArgumentCaptor로 파라미터 값을 캡처
-//        verify(eventRepository).increaseViewCount(eventIdCaptor.capture());
-//        verify(redisService).clientRequest(clientAddressCaptor.capture(), eventIdCaptor.capture());
-//
-//        // 캡처된 파라미터 값이 예상한 값과 일치하는지 검증
-//        assertEquals(Long.valueOf(1L), eventIdCaptor.getValue());
-//        assertEquals("127.0.0.1", clientAddressCaptor.getValue());
-//    }
-
     @Test
-    @DisplayName("이벤트 조회수 증가 성공")
+    @DisplayName("이벤트 조회수 증가 테스트")
     void increaseViewCountTest() {
 
         Long eventId = 1L;
@@ -519,6 +501,214 @@ public class EventServiceTest {
 
         verify(eventRepository).increaseViewCount(eventId);
         verify(redisService).clientRequest(clientAddress, eventId);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 사용자가 이벤트 작성 테스트")
+    void createEventWithNoExistUserTest() {
+        EventCreateDto createDto = EventCreateDto.builder()
+                .title("제목1")
+                .startTime(LocalDateTime.now().minusMonths(1))
+                .endTime(LocalDateTime.now().plusMonths(3))
+                .description("내용")
+                .address("서울특별시 서초구 반포대로30길 32")
+                .location("1층 카페 이로")
+                .hashtags(Arrays.asList("해시태그1", "소녀시대", "아이유"))
+                .build();
+
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            eventService.createEvent(createDto, eventImage2, eventImage1, "noExistUser");
+        });
+
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 이벤트 조회 테스트")
+    void readEventWithNoExistEventTest() {
+        Long eventId = 999L;
+        String clientAddress = "0:0:0:0:0:0:0:1";
+
+        when(eventRepository.findById(eventId)).thenReturn(Optional.empty());
+
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            eventService.readEvent(clientAddress, eventId);
+        });
+
+        assertEquals(ErrorCode.EVENT_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 사용자가 이벤트 수정 테스트")
+    void updateEventWithNoExistUserTest() {
+        Long eventId = event1.getId();
+        EventUpdateDto updateDto = EventUpdateDto.builder()
+                .title("수정된 제목")
+                .description("수정된 내용")
+                .build();
+
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            eventService.updateEvent(eventId, updateDto, eventImage1, eventImage2, "noExistUser");
+        });
+
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 이벤트 수정 테스트")
+    void updateEventWithNoExistEventTest() {
+        Long eventId = 99999L;
+        EventUpdateDto updateDto = EventUpdateDto.builder()
+                .title("수정된 제목")
+                .description("수정된 내용")
+                .build();
+
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user1));
+        when(eventRepository.findById(eventId)).thenReturn(Optional.empty());
+
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            eventService.updateEvent(eventId, updateDto, eventImage1, eventImage2, user1.getUsername());
+        });
+
+        assertEquals(ErrorCode.EVENT_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("작성자 외 이벤트 수정 테스트")
+    void updateEventWithDifferentUserTest() {
+        Long eventId = event1.getId();
+        EventUpdateDto updateDto = EventUpdateDto.builder()
+                .title("수정된 제목")
+                .description("수정된 내용")
+                .build();
+
+        User differentUser = User.builder()
+                .username("differentUser@example.com")
+                .password("qwe123")
+                .nickname("differentUser")
+                .build();
+
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(differentUser));
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event1));
+
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            eventService.updateEvent(eventId, updateDto, eventImage1, eventImage2, differentUser.getUsername());
+        });
+
+        assertEquals(ErrorCode.FORBIDDEN, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 사용자가 이벤트 삭제 테스트")
+    void deleteEventWithNoExistUserTest() {
+        Long eventId = event1.getId();
+
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            eventService.deleteEvent(eventId, "noExistUser");
+        });
+
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 이벤트 삭제 테스트")
+    void deleteEventWithNoExistEventTest() {
+        Long eventId = 999L;
+
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user1));
+        when(eventRepository.findById(eventId)).thenReturn(Optional.empty());
+
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            eventService.deleteEvent(eventId, user1.getUsername());
+        });
+
+        assertEquals(ErrorCode.EVENT_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 이벤트 좋아요 테스트")
+    void likeEventWithNoExistEventTest() {
+        Long eventId = 999L;
+
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user1));
+        when(eventRepository.findById(eventId)).thenReturn(Optional.empty());
+
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            eventService.likeEvent(eventId, user1.getUsername());
+        });
+
+        assertEquals(ErrorCode.EVENT_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 사용자가 이벤트 좋아요 테스트")
+    void likeEventWithNoExistUserTest() {
+        Long eventId = event1.getId();
+
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            eventService.likeEvent(eventId, "noExistUser");
+        });
+
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+    }
+    @Test
+    @DisplayName("존재하지 않는 이벤트 참여 테스트")
+    void joinEventWithNoExistEventTest() {
+        Long eventId = 999999L;
+
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user1));
+        when(eventRepository.findById(eventId)).thenReturn(Optional.empty());
+
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            eventService.joinEvent(eventId, user1.getUsername());
+        });
+
+        assertEquals(ErrorCode.EVENT_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 사용자가 이벤트 참여 테스트")
+    void joinEventWithNoExistUserTest() {
+        Long eventId = event1.getId();
+
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            eventService.joinEvent(eventId, "noExistUser");
+        });
+
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("진행 중이지 않은 이벤트 참여 테스트")
+    void joinEventNotOngoingTest() {
+        Long eventId = event1.getId();
+
+        Event pastEvent = Event.builder()
+                .title("지난 이벤트")
+                .user(user1)
+                .startTime(LocalDateTime.now().minusMonths(3))
+                .endTime(LocalDateTime.now().minusMonths(1))
+                .description("과거 이벤트")
+                .build();
+
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user1));
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(pastEvent));
+
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            eventService.joinEvent(eventId, user1.getUsername());
+        });
+
+        assertEquals(ErrorCode.EVENT_NOT_ONGOING, exception.getErrorCode());
     }
 
 
