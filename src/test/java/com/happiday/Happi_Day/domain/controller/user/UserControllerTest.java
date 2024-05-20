@@ -1,4 +1,4 @@
-package com.happiday.Happi_Day.domain.controller;
+package com.happiday.Happi_Day.domain.controller.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.happiday.Happi_Day.domain.entity.user.RoleType;
@@ -338,21 +338,33 @@ class UserControllerTest {
                 .andExpect(status().isOk());
     }
 
-//    @Test
-//    @DisplayName("마이페이지 - 내 판매글")
-//    void getMySales() {
-//        when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
-//    }
-//
-//    @Test
-//    @DisplayName("마이페이지 - 좋아요한 판매글")
-//    void getLikeSales() {
-//        when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
-//    }
-//
-//    @Test
-//    @DisplayName("마이페이지 - 내 주문글")
-//    void getMyOrders() {
-//        when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
-//    }
+    @Test
+    @DisplayName("마이페이지 - 내 판매글")
+    void getMySales() throws Exception {
+        when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
+
+        mockMvc.perform(get("/api/v1/user/sales"))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("마이페이지 - 좋아요한 판매글")
+    void getLikeSales() throws Exception {
+        when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
+
+        mockMvc.perform(get("/api/v1/user/sales/like"))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("마이페이지 - 내 주문내역")
+    void getMyOrders() throws Exception {
+        when(SecurityUtils.getCurrentUsername()).thenReturn(testUser.getUsername());
+
+        mockMvc.perform(get("/api/v1/user/orders"))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
 }

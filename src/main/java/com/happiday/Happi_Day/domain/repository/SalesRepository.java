@@ -12,8 +12,6 @@ import org.springframework.data.repository.query.Param;
 public interface SalesRepository extends JpaRepository<Sales, Long> {
     Page<Sales> findAllByUsers(User user, Pageable pageable);
 
-    Page<Sales> findAllBySalesLikesUserContains(User user, Pageable pageable);
-
     boolean existsByName(String name);
 
     @Modifying
