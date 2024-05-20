@@ -1,4 +1,4 @@
-package com.happiday.Happi_Day.domain.service;
+package com.happiday.Happi_Day.domain.service.user;
 
 import com.happiday.Happi_Day.domain.entity.event.Event;
 import com.happiday.Happi_Day.domain.entity.event.dto.EventListResponseDto;
@@ -10,6 +10,10 @@ import com.happiday.Happi_Day.domain.entity.user.RoleType;
 import com.happiday.Happi_Day.domain.entity.user.User;
 import com.happiday.Happi_Day.domain.repository.EventRepository;
 import com.happiday.Happi_Day.domain.repository.UserRepository;
+import com.happiday.Happi_Day.domain.service.EventCommentService;
+import com.happiday.Happi_Day.domain.service.EventReviewService;
+import com.happiday.Happi_Day.domain.service.EventService;
+import com.happiday.Happi_Day.domain.service.MyPageService;
 import com.happiday.Happi_Day.utils.DefaultImageUtils;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
