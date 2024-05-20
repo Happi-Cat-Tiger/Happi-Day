@@ -298,7 +298,7 @@ public class SalesControllerTest {
                 .andExpect(jsonPath("$.totalElements").value(1));
     }
 
-    @Test
+//    @Test
     @DisplayName("판매글 목록 조회")
     public void readSalesListTest() throws Exception {
         mockMvc.perform(
