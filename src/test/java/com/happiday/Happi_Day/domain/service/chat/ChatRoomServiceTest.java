@@ -67,7 +67,7 @@ class ChatRoomServiceTest {
         userRepository.save(testUser2);
     }
 
-        @Test
+    @Test
     void 채팅방생성() {
         // given
 
@@ -77,6 +77,34 @@ class ChatRoomServiceTest {
         // then
         ChatRoom chatRoom1 = chatRoomRepository.findBySenderAndReceiver(testUser1, testUser2);
         Assertions.assertThat(result).isEqualTo(chatRoom1.getId());
+    }
+
+    @Test
+    void 채팅방생성_이미생성된방이있을때_sender기준() {
+        // given
+        Long roomId = chatRoomService.createChatRoom("닉네임2", testUser1.getUsername());
+        chatRoomService.deleteChatRoom(testUser1.getUsername(), roomId);
+
+        // when
+        Long result = chatRoomService.createChatRoom("닉네임2", testUser1.getUsername());
+
+        // then
+        ChatRoom chatRoom = chatRoomRepository.findBySenderAndReceiver(testUser1, testUser2);
+        Assertions.assertThat(result).isEqualTo(chatRoom.getId());
+    }
+
+    @Test
+    void 채팅방생성_이미생성된방이있을때_receiver기준() {
+        // given
+        Long roomId = chatRoomService.createChatRoom("닉네임2", testUser1.getUsername());
+        chatRoomService.deleteChatRoom(testUser2.getUsername(), roomId);
+
+        // when
+        Long result = chatRoomService.createChatRoom("닉네임1", testUser2.getUsername());
+
+        // then
+        ChatRoom chatRoom = chatRoomRepository.findBySenderAndReceiver(testUser1, testUser2);
+        Assertions.assertThat(result).isEqualTo(chatRoom.getId());
     }
 
     @Test
@@ -103,7 +131,7 @@ class ChatRoomServiceTest {
     }
 
     @Test
-    void 채팅방삭제() {
+    void 채팅방삭제_sender기준() {
         // given
         ChatRoom chatRoom = ChatRoom.builder()
                 .sender(testUser1)
@@ -121,5 +149,26 @@ class ChatRoomServiceTest {
         // then
         Assertions.assertThat(chatRoom.getIsSenderDeleted()).isTrue();
         Assertions.assertThat(chatRoom.getIsReceiverDeleted()).isFalse();
+    }
+
+    @Test
+    void 채팅방삭제_receiver기준() {
+        // given
+        ChatRoom chatRoom = ChatRoom.builder()
+                .sender(testUser1)
+                .receiver(testUser2)
+                .isSenderDeleted(false)
+                .isReceiverDeleted(false)
+                .open(false)
+                .chatMessages(new ArrayList<>())
+                .build();
+        chatRoomRepository.save(chatRoom);
+
+        // when
+        chatRoomService.deleteChatRoom(testUser2.getUsername(), chatRoom.getId());
+
+        // then
+        Assertions.assertThat(chatRoom.getIsSenderDeleted()).isFalse();
+        Assertions.assertThat(chatRoom.getIsReceiverDeleted()).isTrue();
     }
 }

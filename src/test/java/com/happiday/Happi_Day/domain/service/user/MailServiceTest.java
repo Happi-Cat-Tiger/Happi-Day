@@ -1,5 +1,6 @@
-package com.happiday.Happi_Day.domain.service;
+package com.happiday.Happi_Day.domain.service.user;
 
+import com.happiday.Happi_Day.domain.service.MailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.assertj.core.api.Assertions;
